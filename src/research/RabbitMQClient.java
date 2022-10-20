@@ -1,6 +1,7 @@
 package research;
 
 import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -11,10 +12,14 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class RabbitMQClient {
 	
@@ -50,12 +55,28 @@ public class RabbitMQClient {
 	
 	public void processMessage(String msg) throws JsonParseException, JsonMappingException, IOException {
 		Map<String, String> message = new HashMap<String, String>();
-		ObjectMapper objectMapper = new ObjectMapper();
+		JSONObject root = new JSONObject(msg);
 		
-		message = objectMapper.readValue(msg, new TypeReference<HashMap>() {});
-		System.out.println(message);
+		JSONObject metadataJSON = root.getJSONObject("metadata");
+		String userID = metadataJSON.getString("user_id");
+		String messageType = metadataJSON.getString("message_type");
+		String messageID = metadataJSON.getString("message_id");
+		JSONObject filedata = metadataJSON.getJSONObject("data");
+		JSONObject dataConvertFormats = metadataJSON.getJSONObject("data_convert_formats");
+		JSONArray dataRequestFormats = metadataJSON.getJSONArray("data_request_formats");
+		String originMessageID = metadataJSON.getString("origin_message_id");
+		String sourceUserID = metadataJSON.getString("source_user_id");
 		
-		System.out.println(message.getClass().getName());
+		Metadata metadata = new Metadata(userID, messageType, messageID);
+		metadata.setData(filedata);
+		metadata.setDataConvertFormats(dataConvertFormats);
+		metadata.setDataRequestFormats(dataRequestFormats);
+		metadata.setOriginMessageID(originMessageID);
+		metadata.setSourceUserID(sourceUserID);
+		
+		System.out.println("metadata");
+		System.out.println(metadata);
+		
 	}
 	
 	public void announceMessage(String message) throws IOException {
