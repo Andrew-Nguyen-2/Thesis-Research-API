@@ -7,30 +7,30 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
+import rabbitmq.RabbitMQConnection;
 import user.User;
 
 
 public class ResearchAPI {
 	
 	public User 								user;
+	private RabbitMQConnection 					connection;
 	private ArrayList<String> 					want;
 	private Map<String, ArrayList<String>>		convert;
 	
-	private boolean messagesAvailable = false;
-	
 	public ResearchAPI() {
 		user = new User();
-		want = new ArrayList<String>();
-		convert = new HashMap<String, ArrayList<String>>();
+		want = new ArrayList<>();
+		convert = new HashMap<>();
 	}
 	
 	public void addWantFormats(String ... wantFormats) {
-		for (String format : wantFormats) {
-			want.add(format);
-		}
+		want.addAll(Arrays.asList(wantFormats));
 	}
 	
 	public void addFile(String filepath) {
@@ -44,15 +44,16 @@ public class ResearchAPI {
 	}
 	
 	public void addConvertFormat(String originalFormat, String destinationFormat) {
-		if (!convert.containsKey(originalFormat)) {
-			convert.put(originalFormat, new ArrayList<String>());
-		}
-		
+		convert.putIfAbsent(originalFormat, new ArrayList<>());
 		convert.get(originalFormat).add(destinationFormat);
 	}
 	
 	public void connect() {
-		
+		try {
+			this.connection = new RabbitMQConnection(user);
+		} catch (IOException | TimeoutException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void getNextMessage() {

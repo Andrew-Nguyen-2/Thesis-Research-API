@@ -6,6 +6,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.rabbitmq.client.ConnectionFactory;
+
+import constants.Constants;
+
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
 
@@ -14,16 +17,10 @@ import user.User;
 
 public class RabbitMQConnection {
 	
-	private static final String EXCHANGE_NAME 			= "milestone1";
-	private static final String EXCHANGE_TYPE 			= "topic";
-	
-	private static final String ANNOUNCE_ROUTING_KEY 	= "announce";
-	
 	private User user;
 	private Connection connection;
 	private Channel channel;
-	
-	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private String queueName;
 	
 	
 	public RabbitMQConnection(User user) throws IOException, TimeoutException {
@@ -33,19 +30,19 @@ public class RabbitMQConnection {
 		connection = factory.newConnection();        
 		channel = connection.createChannel();                    
 		                                                         
-		channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE);              
-		String queueName = channel.queueDeclare().getQueue();    
+		channel.exchangeDeclare(Constants.EXCHANGE_NAME, Constants.EXCHANGE_TYPE);              
+		queueName = channel.queueDeclare().getQueue();    
 		                                                         
-		channel.queueBind(queueName, EXCHANGE_NAME, ANNOUNCE_ROUTING_KEY);      
-		channel.queueBind(queueName, EXCHANGE_NAME, this.user.getUserID());
+		channel.queueBind(queueName, Constants.EXCHANGE_NAME, Constants.ANNOUNCE_ROUTING_KEY);      
+		channel.queueBind(queueName, Constants.EXCHANGE_NAME, this.user.getUserID());
 	}
 	
 	public void announce(Message message) {
 		try {
-			channel.basicPublish(EXCHANGE_NAME, ANNOUNCE_ROUTING_KEY, null, message.toJSON().getBytes());
+			channel.basicPublish(Constants.EXCHANGE_NAME, Constants.ANNOUNCE_ROUTING_KEY, null, message.toJSON().getBytes());
 			String sent = String.format(" [x] Sent %s%n", message.toJSON());
 			sent += "To: Everyone\n";
-			LOGGER.log(Level.ALL, sent);
+			Constants.LOGGER.log(Level.ALL, sent);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -59,10 +56,10 @@ public class RabbitMQConnection {
 	
 	public void direct(Message message, String userID) {
 		try {
-			channel.basicPublish(EXCHANGE_NAME, userID, null, message.toJSON().getBytes());
+			channel.basicPublish(Constants.EXCHANGE_NAME, userID, null, message.toJSON().getBytes());
 			String sent = String.format(" [x] Sent %s%n", message.toJSON());
 			sent += String.format("To: %s%n", userID);
-			LOGGER.log(Level.ALL, sent);
+			Constants.LOGGER.log(Level.ALL, sent);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -72,6 +69,14 @@ public class RabbitMQConnection {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public Channel getChannel() {
+		return this.channel;
+	}
+	
+	public String getQueueName() {
+		return this.queueName;
 	}
 
 }

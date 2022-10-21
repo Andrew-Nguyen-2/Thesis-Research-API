@@ -328,12 +328,12 @@ public class Message {
 		 * @return		JSONObject.
 		 */
 		private JSONObject dataToJSON() {
-			JSONObject data = new JSONObject();
+			JSONObject filedata = new JSONObject();
 			
 			for (FileData file : this.data) {
-				data.put(file.filename, file.filesize);
+				filedata.put(file.filename, file.filesize);
 			}
-			return data;
+			return filedata;
 		}
 		
 		/**
@@ -430,7 +430,7 @@ public class Message {
 			while (keys.hasNext()) {
 				String originalFormat = keys.next();
 				JSONArray destFormats = dataConvertFormats.getJSONArray(originalFormat);
-				ArrayList<String> toFormats = new ArrayList<String>();
+				ArrayList<String> toFormats = new ArrayList<>();
 				for (Object toFormat: destFormats) {
 					toFormats.add(String.valueOf(toFormat));
 				}
@@ -445,11 +445,11 @@ public class Message {
 		 * timestamp: "", origin_message_id: "", source_user_id: ""
 		 */
 		public String toString() {
-			String metadata = String.format("user_id: %s, message_id: %s, message_type: %s\n", userID, messageID, messageType);
-			metadata += String.format("data: %s, data_convert_formats: %s, data_request_formats: %s\n", data, dataConvertFormats, dataRequestFormats);
-			metadata += String.format("timestamp: %s, origin_message_id: %s, source_user_id: %s\n", timestamp, originMessageID, sourceUserID);
+			String metadataString = String.format("user_id: %s, message_id: %s, message_type: %s%n", userID, messageID, messageType);
+			metadataString += String.format("data: %s, data_convert_formats: %s, data_request_formats: %s%n", data, dataConvertFormats, dataRequestFormats);
+			metadataString += String.format("timestamp: %s, origin_message_id: %s, source_user_id: %s%n", timestamp, originMessageID, sourceUserID);
 			
-			return metadata;
+			return metadataString;
 		}
 	}
 }
