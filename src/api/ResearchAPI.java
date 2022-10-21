@@ -1,16 +1,13 @@
 package api;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.TimeoutException;
+
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.DeliverCallback;
 
 import rabbitmq.RabbitMQConnection;
 import user.User;
@@ -18,36 +15,49 @@ import user.User;
 
 public class ResearchAPI {
 	
-	public User 								user;
+	private User 								user;
 	private RabbitMQConnection 					connection;
-	private ArrayList<String> 					want;
-	private Map<String, ArrayList<String>>		convert;
+	private Queue<String> 						messageQueue;
 	
+	/**
+	 * Constructor for creating a ResearchAPI instance.
+	 */
 	public ResearchAPI() {
-		user = new User();
-		want = new ArrayList<>();
-		convert = new HashMap<>();
+		this.user = new User();
+		this.messageQueue = new LinkedList<>();
 	}
 	
+	/**
+	 * Add the formats wanted.
+	 * 
+	 * @param wantFormats		Formats wanted.
+	 */
 	public void addWantFormats(String ... wantFormats) {
-		want.addAll(Arrays.asList(wantFormats));
+		this.user.addWant(wantFormats);
 	}
 	
+	/**
+	 * Add the file path of data to share.
+	 * 
+	 * @param filepath		The full file path of the data.
+	 */
 	public void addFile(String filepath) {
-		try {
-			Path validPath = Paths.get(filepath);
-			long bytes = Files.size(validPath);
-			
-		} catch (InvalidPathException | IOException e) {
-			System.out.println(e);
-		}
+		this.user.addFilepaths(filepath);
 	}
 	
+	/**
+	 * Add the formats that can be translated.
+	 * 
+	 * @param originalFormat		The original data format.
+	 * @param destinationFormat		The translated data format.
+	 */
 	public void addConvertFormat(String originalFormat, String destinationFormat) {
-		convert.putIfAbsent(originalFormat, new ArrayList<>());
-		convert.get(originalFormat).add(destinationFormat);
+		this.user.addConvert(originalFormat, destinationFormat);
 	}
 	
+	/**
+	 * Connect to the RabbitMQ server.
+	 */
 	public void connect() {
 		try {
 			this.connection = new RabbitMQConnection(user);
@@ -56,8 +66,72 @@ public class ResearchAPI {
 		}
 	}
 	
-	public void getNextMessage() {
+	/**
+	 * Get the RabbitMQConnection instance.
+	 * 
+	 * @return		The RabbitMQConnection instance.
+	 */
+	public RabbitMQConnection getConnection() {
+		return this.connection;
+	}
+	
+	/**
+	 * Implements a MessageThread and sleeps until notified of a new message.
+	 * 
+	 * @return		The message received.
+	 */
+	public String getNextMessage() {
+		MessageThread messageThread = new MessageThread(this);
+		messageThread.start();
+		synchronized (this) {
+			while (messageQueue.isEmpty()) {
+				try {
+					wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					messageThread.interrupt();
+				}
+			}
+			
+			return messageQueue.remove();
+		}
+	}
+	
+	private class MessageThread extends Thread {
 		
+		private ResearchAPI 		researchAPI;
+		private RabbitMQConnection 	connection;
+		private Channel 			channel;
+		private String 				queueName;
+		
+		/**
+		 * Constructor for creating a MessageThread.
+		 * 
+		 * @param resAPI		The ResearchAPI instance.
+		 */
+		private MessageThread(ResearchAPI resAPI) {
+			this.researchAPI = resAPI;
+			this.connection = this.researchAPI.getConnection();
+			this.channel = this.connection.getChannel();
+			this.queueName = this.connection.getQueueName();
+		}
+		
+		@Override
+		public void run() {
+			try {
+				DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+					String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+					synchronized (this.researchAPI) {
+						this.researchAPI.messageQueue.add(message);
+						this.researchAPI.notifyAll();
+					}
+				};
+				
+				channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {});
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 }

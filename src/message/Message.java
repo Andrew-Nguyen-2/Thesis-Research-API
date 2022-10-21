@@ -120,9 +120,17 @@ public class Message {
 		JSONObject root = new JSONObject(message);
 		
 		JSONObject metadataJSON = root.getJSONObject("metadata");
-		String userID = metadataJSON.getString("user_id");
 		metadata = new Metadata(metadataJSON);
 		content = root.getString("content");
+	}
+	
+	/**
+	 * Get the ID of the user who sent the message.
+	 * 
+	 * @return		The ID of the sender.
+	 */
+	public String getSenderID() {
+		return metadata.userID;
 	}
 	
 	/**
@@ -381,15 +389,15 @@ public class Message {
 		 * @param metadataJSONObj		The metadata as a JSONObject.
 		 */
 		private Metadata(JSONObject metadataJSONObj) {
-			userID = metadataJSONObj.getString("user_id");
-			messageType = metadataJSONObj.getString("message_type");
-			messageID = metadataJSONObj.getString("message_type");
-			setData(metadataJSONObj.getJSONObject("data"));
-			setDataRequestFormats(metadataJSONObj.getJSONArray("data_request_formats"));
-			setDataConvertFormats(metadataJSONObj.getJSONObject("data_convert_formats"));
-			originMessageID = metadataJSONObj.getString("origin_message_id");
-			sourceUserID = metadataJSONObj.getString("source_user_id");
-			timestamp = metadataJSONObj.getString("time_stamp");
+			userID = metadataJSONObj.getString(Constants.USER_ID);
+			messageType = metadataJSONObj.getString(Constants.MESSAGE_TYPE);
+			messageID = metadataJSONObj.getString(Constants.MESSAGE_ID);
+			setData(metadataJSONObj.getJSONObject(Constants.METADATA_FILEDATA));
+			setDataRequestFormats(metadataJSONObj.getJSONArray(Constants.DATA_REQUEST_FORMATS));
+			setDataConvertFormats(metadataJSONObj.getJSONObject(Constants.DATA_CONVERT_FORMATS));
+			originMessageID = metadataJSONObj.getString(Constants.ORIGIN_MESSAGE_ID);
+			sourceUserID = metadataJSONObj.getString(Constants.SOURCE_USER_ID);
+			timestamp = metadataJSONObj.getString(Constants.TIMESTAMP);
 		}
 		
 		/**

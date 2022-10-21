@@ -3,7 +3,6 @@ package rabbitmq;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.rabbitmq.client.ConnectionFactory;
 
@@ -23,6 +22,13 @@ public class RabbitMQConnection {
 	private String queueName;
 	
 	
+	/**
+	 * Constructor for creating a RabbitMQConnection.
+	 * 
+	 * @param user				The user connecting to the RabbitMQ server.
+	 * @throws IOException
+	 * @throws TimeoutException
+	 */
 	public RabbitMQConnection(User user) throws IOException, TimeoutException {
 		this.user = user;
 		ConnectionFactory factory = new ConnectionFactory();     
@@ -37,6 +43,11 @@ public class RabbitMQConnection {
 		channel.queueBind(queueName, Constants.EXCHANGE_NAME, this.user.getUserID());
 	}
 	
+	/**
+	 * Announce a message to all users connected.
+	 * 
+	 * @param message		The message to be sent.
+	 */
 	public void announce(Message message) {
 		try {
 			channel.basicPublish(Constants.EXCHANGE_NAME, Constants.ANNOUNCE_ROUTING_KEY, null, message.toJSON().getBytes());
@@ -54,6 +65,12 @@ public class RabbitMQConnection {
 		}
 	}
 	
+	/**
+	 * Send a direct message to another user.
+	 * 
+	 * @param message		The message to be sent.
+	 * @param userID		The ID of the intended user.
+	 */
 	public void direct(Message message, String userID) {
 		try {
 			channel.basicPublish(Constants.EXCHANGE_NAME, userID, null, message.toJSON().getBytes());
@@ -71,10 +88,20 @@ public class RabbitMQConnection {
 		}
 	}
 	
+	/**
+	 * Get the channel of the instance.
+	 * 
+	 * @return		A Channel instance.
+	 */
 	public Channel getChannel() {
 		return this.channel;
 	}
 	
+	/**
+	 * Get the name of the queue the user is connected to.
+	 * 
+	 * @return		The name of the queue.
+	 */
 	public String getQueueName() {
 		return this.queueName;
 	}

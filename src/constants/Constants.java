@@ -12,7 +12,6 @@ public final class Constants {
 	
 	public static final String EXCHANGE_NAME 			= "milestone1";
 	public static final String EXCHANGE_TYPE 			= "topic";
-	
 	public static final String ANNOUNCE_ROUTING_KEY 	= "announce";
 	
 	// ***********************
