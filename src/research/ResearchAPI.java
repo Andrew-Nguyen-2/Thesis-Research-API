@@ -2,6 +2,10 @@ package research;
 
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +33,13 @@ public class ResearchAPI {
 	}
 	
 	public void addFile(String filepath) {
-		
+		try {
+			Path validPath = Paths.get(filepath);
+			long bytes = Files.size(validPath);
+			
+		} catch (InvalidPathException | IOException e) {
+			System.out.println(e);
+		}
 	}
 	
 	public void addConvertFormat(String originalFormat, String destinationFormat) {
@@ -42,12 +52,6 @@ public class ResearchAPI {
 	
 	public void connect() throws IOException, TimeoutException {
 		RabbitMQClient rmqClient = new RabbitMQClient(this);
-	}
-	
-	
-	public static void main(String[] args) throws Exception {
-		ResearchAPI user = new ResearchAPI();
-		user.connect();
 	}
 	
 }
