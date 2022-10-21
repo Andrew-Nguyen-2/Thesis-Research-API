@@ -1,4 +1,5 @@
-package research;
+package message;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,17 +8,22 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import constants.Constants;
+
 public class Message {
-	public Metadata metadata;
-	public String 	content;
+	
+	private Metadata metadata;
+	private String 	content;
 	
 	// ****************************************
 	//
@@ -46,7 +52,7 @@ public class Message {
 			metadata.setData(validPath);
 			
 		} catch (InvalidPathException | IOException e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 	}
 	
@@ -140,18 +146,18 @@ public class Message {
 	/**
 	 * Get the list of file data in the received message.
 	 * 
-	 * @return		An array list of FileData instances if they exist.
+	 * @return		List of FileData instances if they exist.
 	 */
-	public ArrayList<FileData> getFileData() {
+	public List<FileData> getFileData() {
 		return metadata.data;
 	}
 	
 	/**
 	 * Get the list of requested formats in the received message.
 	 * 
-	 * @return		An array list of formats if they exist.
+	 * @return		List of formats if they exist.
 	 */
-	public ArrayList<String> getRequestFormats() {
+	public List<String> getRequestFormats() {
 		return metadata.dataRequestFormats;
 	}
 	
@@ -186,7 +192,25 @@ public class Message {
 	 * Print the Message instance as "metadata = " followed by the metadata and "content = " followed by the message content.
 	 */
 	public String toString() {
-		return String.format("metadata = %scontent = %s\n", metadata, content);
+		return String.format("metadata = %scontent = %s%n", metadata, content);
+	}
+
+	/**
+	 * Getter for metadata.
+	 * 
+	 * @return		Metadata instance for the metadata of the message.
+	 */
+	public Metadata getMedata() {
+		return this.metadata;
+	}
+	
+	/**
+	 * Getter for content.
+	 * 
+	 * @return		Content string of the message.
+	 */
+	public String content() {
+		return this.content;
 	}
 	
 	private class Metadata {
@@ -195,10 +219,10 @@ public class Message {
 		private String messageType;
 		private String messageID;
 		
-		private ArrayList<FileData> 			data					= new ArrayList<FileData>();;
+		private ArrayList<FileData> 			data;
 		
-		private ArrayList<String> 				dataRequestFormats		= new ArrayList<String>();
-		private Map<String, ArrayList<String>>	dataConvertFormats		= new HashMap<String, ArrayList<String>>();
+		private ArrayList<String> 				dataRequestFormats;
+		private Map<String, ArrayList<String>>	dataConvertFormats;
 		
 		private String 							originMessageID;
 		private String 							sourceUserID;
@@ -223,6 +247,10 @@ public class Message {
 			this.messageType = messageType;
 			this.messageID = UUID.randomUUID().toString();
 			this.timestamp = Instant.now().toString();
+			
+			this.data = new ArrayList<>();
+			this.dataRequestFormats = new ArrayList<>();
+			this.dataConvertFormats = new HashMap<>();
 		}
 		
 		/**
@@ -243,9 +271,7 @@ public class Message {
 		 * @param wants		The formats the user wants
 		 */
 		private void setDataRequestFormats(String...wants) {
-			for (String want : wants) {
-				dataRequestFormats.add(want);
-			}
+			this.dataRequestFormats.addAll(Arrays.asList(wants));
 		}
 		
 		/**
@@ -255,9 +281,7 @@ public class Message {
 		 * @param destination		The destination format.
 		 */
 		private void setDataConvertFormats(String original, String destination) {
-			if (!dataConvertFormats.containsKey(original)) {
-				dataConvertFormats.put(original, new ArrayList<String>());
-			}
+			dataConvertFormats.putIfAbsent(original, new ArrayList<>());
 			dataConvertFormats.get(original).add(destination);
 		}
 		
@@ -286,15 +310,15 @@ public class Message {
 		 */
 		private JSONObject toJSON() {
 			JSONObject meta = new JSONObject();
-			meta.put("user_id", userID);
-			meta.put("message_type", messageType);
-			meta.put("message_id", messageID);
-			meta.put("data", dataToJSON());
-			meta.put("data_convert_formats", convertFormatsToJSON());
-			meta.put("data_request_formats", requestFormatsToJSON());
-			meta.put("origin_message_id", originMessageID);
-			meta.put("source_user_id", sourceUserID);
-			meta.put("time_stamp", timestamp);
+			meta.put(Constants.USER_ID, userID);
+			meta.put(Constants.MESSAGE_TYPE, messageType);
+			meta.put(Constants.MESSAGE_ID, messageID);
+			meta.put(Constants.METADATA_FILEDATA, dataToJSON());
+			meta.put(Constants.DATA_CONVERT_FORMATS, convertFormatsToJSON());
+			meta.put(Constants.DATA_REQUEST_FORMATS, requestFormatsToJSON());
+			meta.put(Constants.ORIGIN_MESSAGE_ID, originMessageID);
+			meta.put(Constants.SOURCE_USER_ID, sourceUserID);
+			meta.put(Constants.TIMESTAMP, timestamp);
 			return meta;
 		}
 		
@@ -371,7 +395,7 @@ public class Message {
 		/**
 		 * Set the data after parsing JSONObject containing the file data.
 		 * 
-		 * @param filedata		The JSONObject containing the filename and filesize.
+		 * @param filedata		The JSONObject containing the filename and file size.
 		 */
 		private void setData(JSONObject filedata) {
 			Iterator<String> keys = filedata.keys();
@@ -384,12 +408,22 @@ public class Message {
 			}
 		}
 		
+		/**
+		 * Set the data request formats after parsing JSONArray containing the formats.
+		 * 
+		 * @param dataRequestFormats		The JSONArray containing request formats.
+		 */
 		private void setDataRequestFormats(JSONArray dataRequestFormats) {
 			for (Object requestFormat : dataRequestFormats) {
 				this.dataRequestFormats.add(String.valueOf(requestFormat));
 			}
 		}
 		
+		/**
+		 * Set the data convert formats after parsing the JSONObject containing the formats.
+		 * 
+		 * @param dataConvertFormats		The JSONObject containing the convert formats.
+		 */
 		private void setDataConvertFormats(JSONObject dataConvertFormats) {
 			Iterator<String> keys = dataConvertFormats.keys();
 			
@@ -404,10 +438,12 @@ public class Message {
 			}
 		}
 		
-		private String userID() {
-			return userID;
-		}
-		
+		/**
+		 * Print the Metadata instance as:
+		 * user_id: "", message_id: "", message_type: ""
+		 * data: [], data_convert_formats: {}, data_request_formats: []
+		 * timestamp: "", origin_message_id: "", source_user_id: ""
+		 */
 		public String toString() {
 			String metadata = String.format("user_id: %s, message_id: %s, message_type: %s\n", userID, messageID, messageType);
 			metadata += String.format("data: %s, data_convert_formats: %s, data_request_formats: %s\n", data, dataConvertFormats, dataRequestFormats);

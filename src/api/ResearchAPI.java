@@ -1,29 +1,30 @@
-package research;
-
+package api;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeoutException;
 
+import user.User;
 
 
 public class ResearchAPI {
 	
-	public String userID;
-	private ArrayList<String> want = new ArrayList<String>();
-	private Map<String, ArrayList<String>> convert = new HashMap<String, ArrayList<String>>();
+	public User 								user;
+	private ArrayList<String> 					want;
+	private Map<String, ArrayList<String>>		convert;
 	
 	private boolean messagesAvailable = false;
 	
 	public ResearchAPI() {
-		userID = UUID.randomUUID().toString();
+		user = new User();
+		want = new ArrayList<String>();
+		convert = new HashMap<String, ArrayList<String>>();
 	}
 	
 	public void addWantFormats(String ... wantFormats) {
@@ -50,8 +51,12 @@ public class ResearchAPI {
 		convert.get(originalFormat).add(destinationFormat);
 	}
 	
-	public void connect() throws IOException, TimeoutException {
-		RabbitMQClient rmqClient = new RabbitMQClient(this);
+	public void connect() {
+		
+	}
+	
+	public void getNextMessage() {
+		
 	}
 	
 }
