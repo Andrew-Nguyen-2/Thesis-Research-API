@@ -50,9 +50,7 @@ public class RabbitMQClient {
 	}
 	
 	public void processMessage(String msg) throws JsonParseException, JsonMappingException, IOException {
-//		Metadata metadata = getMetadata(msg);
-		Message message = new Message();
-		message.loadFromJSON(msg);
+		Message message = new Message(msg);
 		System.out.println("message");
 		System.out.println(message);
 	}
@@ -60,28 +58,5 @@ public class RabbitMQClient {
 	public void announceMessage(String message) throws IOException {
 		channel.basicPublish(EXCHANGE, "announce", null, message.getBytes("UTF-8"));
 	}
-	
-//	private Metadata getMetadata(String msg) {
-//		JSONObject root = new JSONObject(msg);
-//		
-//		JSONObject metadataJSON = root.getJSONObject("metadata");
-//		String userID = metadataJSON.getString("user_id");
-//		String messageType = metadataJSON.getString("message_type");
-//		String messageID = metadataJSON.getString("message_id");
-//		JSONObject filedata = metadataJSON.getJSONObject("data");
-//		JSONObject dataConvertFormats = metadataJSON.getJSONObject("data_convert_formats");
-//		JSONArray dataRequestFormats = metadataJSON.getJSONArray("data_request_formats");
-//		String originMessageID = metadataJSON.getString("origin_message_id");
-//		String sourceUserID = metadataJSON.getString("source_user_id");
-//		
-//		Metadata metadata = new Metadata(userID, messageType, messageID);
-//		metadata.setData(filedata);
-//		metadata.setDataConvertFormats(dataConvertFormats);
-//		metadata.setDataRequestFormats(dataRequestFormats);
-//		metadata.setOriginMessageID(originMessageID);
-//		metadata.setSourceUserID(sourceUserID);
-//		
-//		return metadata;
-//	}
 	
 }
