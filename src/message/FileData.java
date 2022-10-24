@@ -3,12 +3,20 @@ package message;
 
 public class FileData {
 	
-	public String filename;
-	public String filesize;
+	private String filename;
+	private String filesize;
 	
 	public FileData(String filename, String filesize) {
 		this.filename = filename;
 		this.filesize = filesize;
+	}
+	
+	public String getFileName() {
+		return this.filename;
+	}
+	
+	public String getFileSize() {
+		return this.filesize;
 	}
 	
 	

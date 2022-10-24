@@ -3,12 +3,15 @@ package api;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DeliverCallback;
 
+import constants.Constants;
 import rabbitmq.RabbitMQConnection;
 import user.User;
 
@@ -80,20 +83,29 @@ public class ResearchAPI {
 	 * 
 	 * @return		The message received.
 	 */
-	public String getNextMessage() {
+	public void getNextMessage() {
 		MessageThread messageThread = new MessageThread(this);
 		messageThread.start();
-		synchronized (this) {
-			while (messageQueue.isEmpty()) {
+		Constants.LOGGER.log(Level.ALL, " [*] Began listening to RabbitMQ server.%n");
+		System.out.println(" [*] Began listening to RabbitMQ server. \n");
+		while (true) {
+			synchronized (this) {
+				while (messageQueue.isEmpty()) {
+					try {
+						wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+						Thread.currentThread().interrupt();
+					}
+				}
 				try {
-					wait();
-				} catch (InterruptedException e) {
+					String message = messageQueue.remove();
+					String received = String.format(" [x] Received %s \n", message); 
+					System.out.println(received);
+				} catch (NoSuchElementException e) {
 					e.printStackTrace();
-					messageThread.interrupt();
 				}
 			}
-			
-			return messageQueue.remove();
 		}
 	}
 	

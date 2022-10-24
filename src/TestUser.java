@@ -12,8 +12,8 @@ public class TestUser {
 		ResearchAPI user = new ResearchAPI();
 		
 		user.addWantFormats("csv", "json");
-		user.addConvertFormat("csv", "scatter");
 		user.connect();
+		user.getNextMessage();
 	}
 
 }

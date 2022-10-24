@@ -333,13 +333,16 @@ public class Message {
 		/**
 		 * Convert the array list of FileData instances to a JSONObject.
 		 * 
-		 * @return		JSONObject.
+		 * @return		JSONArray.
 		 */
-		private JSONObject dataToJSON() {
-			JSONObject filedata = new JSONObject();
+		private JSONArray dataToJSON() {
+			JSONArray filedata = new JSONArray();
 			
 			for (FileData file : this.data) {
-				filedata.put(file.filename, file.filesize);
+				JSONObject currFileData = new JSONObject();
+				currFileData.put("filename", file.getFileName());
+				currFileData.put("filesize", file.getFileSize());
+				filedata.put(currFileData);
 			}
 			return filedata;
 		}
@@ -347,17 +350,19 @@ public class Message {
 		/**
 		 * Convert the map of original formats and their respected array list of destination formats to a JSONObject.
 		 * 
-		 * @return		JSONObject.
+		 * @return		JSONArray.
 		 */
-		private JSONObject convertFormatsToJSON() {
-			JSONObject convert = new JSONObject();
+		private JSONArray convertFormatsToJSON() {
+			JSONArray convert = new JSONArray();
 			
 			for (Map.Entry<String, ArrayList<String>> entry : this.dataConvertFormats.entrySet()) {
+				JSONObject currConvert = new JSONObject();
 				JSONArray destinationFormats = new JSONArray();
 				for (String destFormat : entry.getValue()) {
 					destinationFormats.put(destFormat);
 				}
-				convert.put(entry.getKey(), destinationFormats);
+				currConvert.put("original_format", entry.getKey());
+				currConvert.put("destination_formats", destinationFormats);
 			}
 			return convert;
 		}

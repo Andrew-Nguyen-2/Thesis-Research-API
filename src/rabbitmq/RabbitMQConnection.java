@@ -54,6 +54,7 @@ public class RabbitMQConnection {
 			String sent = String.format(" [x] Sent %s%n", message.toJSON());
 			sent += "To: Everyone\n";
 			Constants.LOGGER.log(Level.ALL, sent);
+			System.out.println(sent);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -77,6 +78,7 @@ public class RabbitMQConnection {
 			String sent = String.format(" [x] Sent %s%n", message.toJSON());
 			sent += String.format("To: %s%n", userID);
 			Constants.LOGGER.log(Level.ALL, sent);
+			System.out.println(sent);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
