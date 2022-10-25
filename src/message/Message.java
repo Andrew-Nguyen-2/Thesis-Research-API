@@ -57,12 +57,33 @@ public class Message {
 	}
 	
 	/**
+	 * Add the FileData when requesting data.
+	 * 
+	 * @param filedata		The file data the user is requesting.
+	 */
+	public void requestFile(FileData filedata) {
+		metadata.setData(filedata);
+	}
+	
+	
+	/**
 	 * Add the data formats the user wants.
 	 * 
 	 * @param wants		The formats the user wants.
 	 */
 	public void addRequestFormats(String...wants) {
 		metadata.setDataRequestFormats(wants);
+	}
+	
+	/**
+	 * Add the data formats the user wants (from User instance).
+	 * 
+	 * @param wants		The list of formats the user wants.
+	 */
+	public void addRequestFormats(List<String> wants) {
+		for (String want : wants) {
+			metadata.setDataRequestFormats(want);
+		}
 	}
 	
 	/**
@@ -91,6 +112,15 @@ public class Message {
 	 */
 	public void addSourceUserID(String sourceUserID) {
 		metadata.setSourceUserID(sourceUserID);
+	}
+	
+	/**
+	 * Add the content for the message.
+	 * 
+	 * @param content
+	 */
+	public void addContent(String content) {
+		this.content = content;
 	}
 	
 	/**
@@ -217,7 +247,7 @@ public class Message {
 	 * 
 	 * @return		Content string of the message.
 	 */
-	public String content() {
+	public String getContent() {
 		return this.content;
 	}
 	
@@ -227,10 +257,10 @@ public class Message {
 		private String messageType;
 		private String messageID;
 		
-		private ArrayList<FileData> 			data;
+		private ArrayList<FileData> 			data					= new ArrayList<>();
 		
-		private ArrayList<String> 				dataRequestFormats;
-		private Map<String, ArrayList<String>>	dataConvertFormats;
+		private ArrayList<String> 				dataRequestFormats		= new ArrayList<>();
+		private Map<String, ArrayList<String>>	dataConvertFormats		= new HashMap<>();
 		
 		private String 							originMessageID;
 		private String 							sourceUserID;
@@ -255,14 +285,10 @@ public class Message {
 			this.messageType = messageType;
 			this.messageID = UUID.randomUUID().toString();
 			this.timestamp = Instant.now().toString();
-			
-			this.data = new ArrayList<>();
-			this.dataRequestFormats = new ArrayList<>();
-			this.dataConvertFormats = new HashMap<>();
 		}
 		
 		/**
-		 * Add the file path to the array list of FileData instances
+		 * Add the file path to the array list of FileData instances.
 		 * 
 		 * @param filepath			The file path of the file shared.
 		 * @throws IOException
@@ -271,6 +297,15 @@ public class Message {
 			String filename = filepath.getFileName().toString();
 			String filesize = String.valueOf(Files.size(filepath));
 			data.add(new FileData(filename, filesize));
+		}
+		
+		/**
+		 * Add the requested file data to the metadata.
+		 * 
+		 * @param filedata		The file data the user is requesting.
+		 */
+		private void setData(FileData filedata) {
+			data.add(filedata);
 		}
 		
 		/**
@@ -397,28 +432,26 @@ public class Message {
 			userID = metadataJSONObj.getString(Constants.USER_ID);
 			messageType = metadataJSONObj.getString(Constants.MESSAGE_TYPE);
 			messageID = metadataJSONObj.getString(Constants.MESSAGE_ID);
-			setData(metadataJSONObj.getJSONObject(Constants.METADATA_FILEDATA));
+			setData(metadataJSONObj.getJSONArray(Constants.METADATA_FILEDATA));
 			setDataRequestFormats(metadataJSONObj.getJSONArray(Constants.DATA_REQUEST_FORMATS));
-			setDataConvertFormats(metadataJSONObj.getJSONObject(Constants.DATA_CONVERT_FORMATS));
+			setDataConvertFormats(metadataJSONObj.getJSONArray(Constants.DATA_CONVERT_FORMATS));
 			originMessageID = metadataJSONObj.getString(Constants.ORIGIN_MESSAGE_ID);
 			sourceUserID = metadataJSONObj.getString(Constants.SOURCE_USER_ID);
 			timestamp = metadataJSONObj.getString(Constants.TIMESTAMP);
 		}
 		
 		/**
-		 * Set the data after parsing JSONObject containing the file data.
+		 * Set the data after parsing JSONArray containing the file data.
 		 * 
-		 * @param filedata		The JSONObject containing the filename and file size.
+		 * @param filedata		The JSONArray containing the filename and file size.
 		 */
-		private void setData(JSONObject filedata) {
-			Iterator<String> keys = filedata.keys();
-			
-			
-			while (keys.hasNext()) {
-				String filename = keys.next();
-				String filesize = Integer.toString(filedata.getInt(filename));
+		private void setData(JSONArray filedata) {
+			for (Object file : filedata) {
+				String filename = ((JSONObject) file).getString("filename");
+				String filesize = Integer.toString(((JSONObject) file).getInt("filesize"));
 				this.data.add(new FileData(filename, filesize));
 			}
+			
 		}
 		
 		/**
@@ -433,21 +466,17 @@ public class Message {
 		}
 		
 		/**
-		 * Set the data convert formats after parsing the JSONObject containing the formats.
+		 * Set the data convert formats after parsing the JSONArray containing the formats.
 		 * 
-		 * @param dataConvertFormats		The JSONObject containing the convert formats.
+		 * @param dataConvertFormats		The JSONArray containing the convert formats.
 		 */
-		private void setDataConvertFormats(JSONObject dataConvertFormats) {
-			Iterator<String> keys = dataConvertFormats.keys();
-			
-			while (keys.hasNext()) {
-				String originalFormat = keys.next();
-				JSONArray destFormats = dataConvertFormats.getJSONArray(originalFormat);
-				ArrayList<String> toFormats = new ArrayList<>();
-				for (Object toFormat: destFormats) {
-					toFormats.add(String.valueOf(toFormat));
+		private void setDataConvertFormats(JSONArray dataConvertFormats) {
+			for (Object convert : dataConvertFormats) {
+				ArrayList<String> destFormats = new ArrayList<>();
+				for (Object toFormat: ((JSONObject) convert).getJSONArray("destinatino_formats")) {
+					destFormats.add(toFormat.toString());
 				}
-				this.dataConvertFormats.put(originalFormat, toFormats);
+				this.dataConvertFormats.put(((JSONObject) convert).getString("original_format"), destFormats);
 			}
 		}
 		

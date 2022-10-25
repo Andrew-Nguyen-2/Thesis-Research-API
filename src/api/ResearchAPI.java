@@ -12,6 +12,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DeliverCallback;
 
 import constants.Constants;
+import message.ProcessMessage;
 import rabbitmq.RabbitMQConnection;
 import user.User;
 
@@ -100,8 +101,8 @@ public class ResearchAPI {
 				}
 				try {
 					String message = messageQueue.remove();
-					String received = String.format(" [x] Received %s \n", message); 
-					System.out.println(received);
+					ProcessMessage processMessage = new ProcessMessage(user, message);
+					processMessage.process();
 				} catch (NoSuchElementException e) {
 					e.printStackTrace();
 				}

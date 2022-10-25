@@ -23,6 +23,7 @@ public final class Constants {
 	public static final String ANNOUNCE_MESSAGE 		= "announce_data";
 	public static final String CAN_TRANSLATE 			= "can_translate";
 	public static final String REQUEST_DATA 			= "request_data";
+	public static final String SENT_DATA				= "sent_data";
 	
 	
 	// ************************
