@@ -473,7 +473,7 @@ public class Message {
 		private void setDataConvertFormats(JSONArray dataConvertFormats) {
 			for (Object convert : dataConvertFormats) {
 				ArrayList<String> destFormats = new ArrayList<>();
-				for (Object toFormat: ((JSONObject) convert).getJSONArray("destinatino_formats")) {
+				for (Object toFormat: ((JSONObject) convert).getJSONArray("destination_formats")) {
 					destFormats.add(toFormat.toString());
 				}
 				this.dataConvertFormats.put(((JSONObject) convert).getString("original_format"), destFormats);

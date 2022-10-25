@@ -2,6 +2,7 @@ package api;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
@@ -12,6 +13,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DeliverCallback;
 
 import constants.Constants;
+import message.Message;
 import message.ProcessMessage;
 import rabbitmq.RabbitMQConnection;
 import user.User;
@@ -64,7 +66,15 @@ public class ResearchAPI {
 	 */
 	public void connect() {
 		try {
-			this.connection = new RabbitMQConnection(user);
+			this.connection = new RabbitMQConnection(this.user);
+			if (!this.user.getFilepaths().isEmpty()) {
+				Message announceData = new Message(this.user.getUserID(), Constants.ANNOUNCE_MESSAGE);
+				for (Path filepath : this.user.getFilepaths()) {
+					announceData.addFilePath(filepath.toString());
+				}
+				announceData.addContent("I have data.");
+				this.connection.announce(announceData, true);
+			}
 		} catch (IOException | TimeoutException e) {
 			e.printStackTrace();
 		}

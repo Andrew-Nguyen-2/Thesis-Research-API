@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
+import org.json.JSONObject;
+
 import constants.Constants;
 import rabbitmq.RabbitMQConnection;
 import user.User;
@@ -40,20 +42,26 @@ public class ProcessMessage {
 	 */
 	public ProcessMessage(User user, String message) {
 		this.user = user;
-		this.message = new Message(message);
+		JSONObject root = new JSONObject(message);
+		JSONObject metadata = root.getJSONObject(Constants.METADATA);
 		
-		this.senderID = this.message.getSenderID();
-		this.messageType = this.message.getMessageType();
-		
-		this.userID = this.user.getUserID();
-		this.filepaths = this.user.getFilepaths();
-		this.wantFormats = this.user.getWantFormats();
-		this.convertFormats = this.user.getConvertFormats();
-		
-		try {
-			this.connection = new RabbitMQConnection(user);
-		} catch (IOException | TimeoutException e) {
-			e.printStackTrace();
+		// Ignore messages current user sent
+		if (!Objects.equals(metadata.getString(Constants.USER_ID), user.getUserID())) {
+			this.message = new Message(message);
+			
+			this.senderID = this.message.getSenderID();
+			this.messageType = this.message.getMessageType();
+			
+			this.userID = this.user.getUserID();
+			this.filepaths = this.user.getFilepaths();
+			this.wantFormats = this.user.getWantFormats();
+			this.convertFormats = this.user.getConvertFormats();
+			
+			try {
+				this.connection = new RabbitMQConnection(user);
+			} catch (IOException | TimeoutException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -61,9 +69,7 @@ public class ProcessMessage {
 	 * Directs to method for handling received message
 	 */
 	public void process() {
-		
-		// Ignore messages current user sent
-		if (!Objects.equals(senderID, userID)) {
+		if (this.message != null) {
 			System.out.println(String.format(" [x] Received %s", message));
 			user.addReceivedMessage(message.getMessageID(), message);
 			
@@ -93,13 +99,13 @@ public class ProcessMessage {
 				}
 			}
 			
-//			if (Objects.equals(messageType, Constants.SENT_DATA)) {
-//				try {
-//					Wormhole.receive(message.getContent());
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//			}
+	//			if (Objects.equals(messageType, Constants.SENT_DATA)) {
+	//				try {
+	//					Wormhole.receive(message.getContent());
+	//				} catch (IOException e) {
+	//					e.printStackTrace();
+	//				}
+	//			}	
 		}
 	}
 	

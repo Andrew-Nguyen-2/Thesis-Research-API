@@ -67,6 +67,24 @@ public class RabbitMQConnection {
 	}
 	
 	/**
+	 * Announce a message to all users connected and stay connection.
+	 * 
+	 * @param message					The message to be sent.
+	 * @param initialAnnouncement		True if used to make initial announcement about data
+	 */
+	public void announce(Message message, boolean initalAnnouncement) {
+		try {
+			channel.basicPublish(Constants.EXCHANGE_NAME, Constants.ANNOUNCE_ROUTING_KEY, null, message.toJSON().getBytes());
+			String sent = String.format(" [x] Sent %s%n", message.toJSON());
+			sent += "To: Everyone\n";
+			Constants.LOGGER.log(Level.ALL, sent);
+			System.out.println(sent);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
 	 * Send a direct message to another user.
 	 * 
 	 * @param message		The message to be sent.
