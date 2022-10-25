@@ -77,15 +77,18 @@ public class ProcessMessage {
 			if (!this.wantFormats.isEmpty()) {
 				switch (messageType) {
 				
-				// if the message is a user announcing data
-				case Constants.ANNOUNCE_MESSAGE:
-					wantData();
-					break;
-				
-				case Constants.REQUEST_DATA:
-					break;
+					// if the message is a user announcing data
+					case Constants.ANNOUNCE_MESSAGE:
+						wantData();
+						break;
 					
-				default: break;
+					case Constants.REQUEST_DATA:
+						break;
+					
+					case Constants.CAN_TRANSLATE:
+						wantConvertedData();
+						break;
+					default: break;
 				
 				}
 			}
@@ -93,9 +96,14 @@ public class ProcessMessage {
 			if (!this.convertFormats.isEmpty()) {
 				switch (messageType) {
 				
-				case Constants.ANNOUNCE_MESSAGE:
-					convertDataAnnouncement();
-					break;
+					case Constants.ANNOUNCE_MESSAGE:
+						convertDataAnnouncement();
+						break;
+
+					case Constants.REQUEST_DATA:
+						break;
+				
+					default: break;
 				}
 			}
 			
@@ -113,25 +121,28 @@ public class ProcessMessage {
 	 * Check if data is in a format the user wants.
 	 */
 	private void wantData() {
-		List<FileData> data = message.getFileData();
+		List<FileData> data = this.message.getFileData();
 		
 		for (FileData filedata : data) {
 			String filename = filedata.getFileName();
 			String fileformat = filename.split("[.]")[1];
 			
 			// if the format the sender sent is one the user wants
-			if (wantFormats.contains(fileformat)) {
-				Message requestMessage = new Message(userID, Constants.REQUEST_DATA);
-				requestMessage.addRequestFormats(wantFormats);
+			if (this.wantFormats.contains(fileformat)) {
+				Message requestMessage = new Message(this.userID, Constants.REQUEST_DATA);
+				requestMessage.addRequestFormats(this.wantFormats);
 				requestMessage.requestFile(filedata);
-				requestMessage.addOriginMessageID(message.getMessageID());
-				requestMessage.addSourceUserID(message.getSenderID());
+				requestMessage.addOriginMessageID(this.message.getMessageID());
+				requestMessage.addSourceUserID(this.message.getSenderID());
 				requestMessage.addContent("Requesting file '" + filename + "'");
-				connection.direct(requestMessage, message.getSenderID());
+				this.connection.direct(requestMessage, this.message.getSenderID());
 			}
 		}
 	}
 	
+	/**
+	 * Send can translate announcement if user can translate the data.
+	 */
 	private void convertDataAnnouncement() {
 		List<FileData> announcedData = this.message.getFileData();
 		List<FileData> requestData = new ArrayList<>();
@@ -145,7 +156,7 @@ public class ProcessMessage {
 			}
 		}
 		
-		Message requestMessage = new Message(userID, Constants.CAN_TRANSLATE);
+		Message requestMessage = new Message(this.userID, Constants.CAN_TRANSLATE);
 		
 		for (FileData file : requestData) {
 			requestMessage.requestFile(file);
@@ -159,9 +170,43 @@ public class ProcessMessage {
 		}
 		
 		requestMessage.addOriginMessageID(this.message.getOriginMessageID());
-		requestMessage.addSourceUserID(message.getSenderID());
+		requestMessage.addSourceUserID(this.message.getSenderID());
 		requestMessage.addContent("I can convert the data from " + convertableFormats);
 		this.connection.direct(requestMessage, this.senderID);
+	}
+	
+	/**
+	 * Send request to translator for file data converted.
+	 */
+	private void wantConvertedData() {
+		Map<String, ArrayList<String>> announcedConvertableFormats = this.message.getConvertFormats();
+		boolean foundFormat = false;
+		String requestFormat = null;
+		
+		for (String want : this.wantFormats) {
+			for (ArrayList<String> destFormat : announcedConvertableFormats.values()) {
+				if (destFormat.contains(want)) {
+					requestFormat = want;
+					foundFormat = true;
+					break;
+				}
+			}
+			if (foundFormat) {
+				break;
+			}
+		}
+		
+		if (requestFormat != null) {
+			Message requestMessage = new Message(this.userID, Constants.REQUEST_DATA);
+			for (FileData file : this.message.getFileData()) {
+				requestMessage.requestFile(file);
+			}
+			requestMessage.addRequestFormats(requestFormat);
+			requestMessage.addOriginMessageID(this.message.getOriginMessageID());
+			requestMessage.addSourceUserID(this.message.getSourceUserID());
+			requestMessage.addContent("Requesting data to be converted to " + requestFormat);
+			this.connection.direct(requestMessage, this.message.getSenderID());
+		}
 	}
 
 }

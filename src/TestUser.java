@@ -13,7 +13,8 @@ public class TestUser {
 		
 //		user.addConvertFormat("csv", "json");
 //		user.addConvertFormat("csv", "scatter");
-		user.addFile("/Users/andrewnguyen/eclipse-workspace/research/test-files/test-data.csv");
+//		user.addFile("/Users/andrewnguyen/eclipse-workspace/research/test-files/test-data.csv");
+		user.addWantFormats("json");
 		user.connect();
 		user.getNextMessage();
 	}
