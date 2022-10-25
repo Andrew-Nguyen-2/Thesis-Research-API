@@ -11,7 +11,8 @@ public class TestUser {
 	public static void main(String[] args) throws IOException, TimeoutException {
 		ResearchAPI user = new ResearchAPI();
 		
-		user.addWantFormats("csv");
+		user.addConvertFormat("csv", "json");
+		user.addConvertFormat("csv", "scatter");
 		user.connect();
 		user.getNextMessage();
 	}

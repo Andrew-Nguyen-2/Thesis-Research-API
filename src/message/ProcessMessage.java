@@ -3,6 +3,7 @@ package message;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -67,7 +68,7 @@ public class ProcessMessage {
 			user.addReceivedMessage(message.getMessageID(), message);
 			
 			// if the user wants certain data formats
-			if (!wantFormats.isEmpty()) {
+			if (!this.wantFormats.isEmpty()) {
 				switch (messageType) {
 				
 				// if the message is a user announcing data
@@ -83,13 +84,22 @@ public class ProcessMessage {
 				}
 			}
 			
-			if (Objects.equals(messageType, Constants.SENT_DATA)) {
-				try {
-					Wormhole.receive(message.getContent());
-				} catch (IOException e) {
-					e.printStackTrace();
+			if (!this.convertFormats.isEmpty()) {
+				switch (messageType) {
+				
+				case Constants.ANNOUNCE_MESSAGE:
+					convertDataAnnouncement();
+					break;
 				}
 			}
+			
+//			if (Objects.equals(messageType, Constants.SENT_DATA)) {
+//				try {
+//					Wormhole.receive(message.getContent());
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
 		}
 	}
 	
@@ -114,6 +124,38 @@ public class ProcessMessage {
 				connection.direct(requestMessage, message.getSenderID());
 			}
 		}
+	}
+	
+	private void convertDataAnnouncement() {
+		List<FileData> announcedData = this.message.getFileData();
+		List<FileData> requestData = new ArrayList<>();
+		Map<String, ArrayList<String>> convertableFormats = new HashMap<>();
+		
+		for (FileData file : announcedData) {
+			String fileformat = file.getFileName().split("[.]")[1];
+			if (this.convertFormats.containsKey(fileformat)) {
+				requestData.add(file);
+				convertableFormats.put(fileformat, this.convertFormats.get(fileformat));
+			}
+		}
+		
+		Message requestMessage = new Message(userID, Constants.CAN_TRANSLATE);
+		
+		for (FileData file : requestData) {
+			requestMessage.requestFile(file);
+		}
+		
+		for (Map.Entry<String, ArrayList<String>> entry : convertableFormats.entrySet()) {
+			String originalFormat = entry.getKey();
+			for (String destFormat : convertableFormats.get(originalFormat)) {
+				requestMessage.addConvertFormat(originalFormat, destFormat);
+			}
+		}
+		
+		requestMessage.addOriginMessageID(this.message.getOriginMessageID());
+		requestMessage.addSourceUserID(message.getSenderID());
+		requestMessage.addContent("I can convert the data from " + convertableFormats);
+		this.connection.direct(requestMessage, this.senderID);
 	}
 
 }
