@@ -75,7 +75,7 @@ public class RabbitMQConnection {
 	public void announce(Message message, boolean initalAnnouncement) {
 		try {
 			channel.basicPublish(Constants.EXCHANGE_NAME, Constants.ANNOUNCE_ROUTING_KEY, null, message.toJSON().getBytes());
-			String sent = String.format(" [x] Sent %s%n", message.toJSON());
+			String sent = String.format(" [x] Sent %s", message.toString());
 			sent += "To: Everyone\n";
 			Constants.LOGGER.log(Level.ALL, sent);
 			System.out.println(sent);
@@ -93,8 +93,8 @@ public class RabbitMQConnection {
 	public void direct(Message message, String userID) {
 		try {
 			channel.basicPublish(Constants.EXCHANGE_NAME, userID, null, message.toJSON().getBytes());
-			String sent = String.format(" [x] Sent %s%n", message.toJSON());
-			sent += String.format("To: %s%n", userID);
+			String sent = String.format(" [x] Sent %s", message.toString());
+			sent += String.format("To: %s \n", userID);
 			Constants.LOGGER.log(Level.ALL, sent);
 			System.out.println(sent);
 		} catch (IOException e) {

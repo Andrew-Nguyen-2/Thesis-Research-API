@@ -11,10 +11,10 @@ public class TestUser {
 	public static void main(String[] args) throws IOException, TimeoutException {
 		ResearchAPI user = new ResearchAPI();
 		
-//		user.addConvertFormat("csv", "json");
+		user.addConvertFormat("csv", "json");
 //		user.addConvertFormat("csv", "scatter");
 //		user.addFile("/Users/andrewnguyen/eclipse-workspace/research/test-files/test-data.csv");
-		user.addWantFormats("json");
+//		user.addWantFormats("json");
 		user.connect();
 		user.getNextMessage();
 	}

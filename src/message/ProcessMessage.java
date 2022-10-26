@@ -70,8 +70,15 @@ public class ProcessMessage {
 	 */
 	public void process() {
 		if (this.message != null) {
-			System.out.println(String.format(" [x] Received %s", message));
-			user.addReceivedMessage(message.getMessageID(), message);
+			System.out.println(String.format(" [x] Received %s", this.message));
+			this.user.addReceivedMessage(message.getMessageID(), message);
+//			Map<String, Message> userReceivedMessages = this.user.getAllMessages();
+//			System.out.println("BEFORE UPDATE RECEIVED MESSAGES: " + this.user.getAllMessages().size());
+			
+//			userReceivedMessages.put(this.message.getMessageID(), this.message);
+//			this.user.updateReceivedMessage(userReceivedMessages);
+			
+//			System.out.println("AFTER UPDATE RECEIVED MESSAGES: " + this.user.getAllMessages().size());
 			
 			// if the user wants certain data formats
 			if (!this.wantFormats.isEmpty()) {
@@ -79,7 +86,7 @@ public class ProcessMessage {
 				
 					// if the message is a user announcing data
 					case Constants.ANNOUNCE_MESSAGE:
-						wantData();
+						wantData(false);
 						break;
 					
 					case Constants.REQUEST_DATA:
@@ -93,6 +100,7 @@ public class ProcessMessage {
 				}
 			}
 			
+			// if the user can convert data formats
 			if (!this.convertFormats.isEmpty()) {
 				switch (messageType) {
 				
@@ -101,43 +109,103 @@ public class ProcessMessage {
 						break;
 
 					case Constants.REQUEST_DATA:
+						wantData(true);
 						break;
 				
 					default: break;
 				}
 			}
 			
-	//			if (Objects.equals(messageType, Constants.SENT_DATA)) {
-	//				try {
-	//					Wormhole.receive(message.getContent());
-	//				} catch (IOException e) {
-	//					e.printStackTrace();
-	//				}
-	//			}	
+//			if (Objects.equals(messageType, Constants.SENT_DATA)) {
+//				try {
+//					Wormhole.receive(message.getContent());
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
 		}
 	}
 	
 	/**
 	 * Check if data is in a format the user wants.
+	 * 
+	 * @param forConvert		True if the user is requesting the data from the user for converting. False otherwise.
 	 */
-	private void wantData() {
+	private void wantData(boolean forConvert) {
+		
+		List<String> requestWantFormats = this.wantFormats;
 		List<FileData> data = this.message.getFileData();
+		String messageID = this.message.getMessageID();
+		String originSenderID = this.message.getSenderID();
+		
+		// if the user is requesting the original data from the user who has it
+		if (forConvert) {
+			Object[] wantArgs = getWantArgs();
+			for (Object wantArg : wantArgs) {
+				if (wantArg == null) {
+					return;
+				}
+			}
+			requestWantFormats = (List<String>) wantArgs[0];
+			data = (List<FileData>) wantArgs[1];
+			messageID = (String) wantArgs[2];
+			originSenderID = (String) wantArgs[3];
+		}
 		
 		for (FileData filedata : data) {
 			String filename = filedata.getFileName();
 			String fileformat = filename.split("[.]")[1];
 			
 			// if the format the sender sent is one the user wants
-			if (this.wantFormats.contains(fileformat)) {
+			if (requestWantFormats.contains(fileformat)) {
 				Message requestMessage = new Message(this.userID, Constants.REQUEST_DATA);
-				requestMessage.addRequestFormats(this.wantFormats);
+				requestMessage.addRequestFormats(requestWantFormats);
 				requestMessage.requestFile(filedata);
-				requestMessage.addOriginMessageID(this.message.getMessageID());
-				requestMessage.addSourceUserID(this.message.getSenderID());
+				requestMessage.addOriginMessageID(messageID);
+				requestMessage.addSourceUserID(originSenderID);
 				requestMessage.addContent("Requesting file '" + filename + "'");
-				this.connection.direct(requestMessage, this.message.getSenderID());
+				this.connection.direct(requestMessage, originSenderID);
 			}
 		}
+	}
+	
+	/**
+	 * Helper function for wantData when a user who can translate receives a request for translation.
+	 * 
+	 * @return		An array with a list of specific want formats, a list of the announced data, the original message id, and the producer id.
+	 */
+	private Object[] getWantArgs() {
+		List<String> requestFormats = this.message.getRequestFormats();
+		List<String> newWantedFormats = new ArrayList<>();
+		Object[] wantArgs = new Object[4];
+		
+		// check if the format the user is requesting the data to be translated to, is valid for the translator
+		for (String format : requestFormats) {
+			for (Map.Entry<String, ArrayList<String>> entry : this.convertFormats.entrySet()) {
+				ArrayList<String> toFormats = entry.getValue();
+				
+				// if the format requested is a destination format, add the original format to newWantedFormats
+				if (toFormats.contains(format)) {
+					newWantedFormats.add(entry.getKey());
+				}
+			}
+		}
+		
+		// get the origin message ID
+		String originMessageID = this.message.getOriginMessageID();
+		Message originMessage = this.user.getMessage(originMessageID);
+		
+		// return empty array if no origin message can be found
+		if (originMessage == null) {
+			return wantArgs;
+		}
+
+		wantArgs[0] = newWantedFormats;
+		wantArgs[1] = originMessage.getFileData();
+		wantArgs[2] = originMessageID;
+		wantArgs[3] = originMessage.getSenderID();
+		
+		return wantArgs;
 	}
 	
 	/**
@@ -169,10 +237,10 @@ public class ProcessMessage {
 			}
 		}
 		
-		requestMessage.addOriginMessageID(this.message.getOriginMessageID());
+		requestMessage.addOriginMessageID(this.message.getMessageID());
 		requestMessage.addSourceUserID(this.message.getSenderID());
 		requestMessage.addContent("I can convert the data from " + convertableFormats);
-		this.connection.direct(requestMessage, this.senderID);
+		this.connection.announce(requestMessage);
 	}
 	
 	/**

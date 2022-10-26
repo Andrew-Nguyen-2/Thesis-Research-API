@@ -398,6 +398,7 @@ public class Message {
 				}
 				currConvert.put("original_format", entry.getKey());
 				currConvert.put("destination_formats", destinationFormats);
+				convert.put(currConvert);
 			}
 			return convert;
 		}
