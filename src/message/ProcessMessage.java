@@ -23,6 +23,7 @@ public class ProcessMessage {
 	// received message info
 	private String senderID;
 	private String messageType;
+	private String messageID;
 	
 	// receiving user info
 	private String userID;
@@ -51,6 +52,7 @@ public class ProcessMessage {
 			
 			this.senderID = this.message.getSenderID();
 			this.messageType = this.message.getMessageType();
+			this.messageID = this.message.getMessageID();
 			
 			this.userID = this.user.getUserID();
 			this.filepaths = this.user.getFilepaths();
@@ -71,58 +73,79 @@ public class ProcessMessage {
 	public void process() {
 		if (this.message != null) {
 			System.out.println(String.format(" [x] Received %s", this.message));
-			this.user.addReceivedMessage(message.getMessageID(), message);
-//			Map<String, Message> userReceivedMessages = this.user.getAllMessages();
-//			System.out.println("BEFORE UPDATE RECEIVED MESSAGES: " + this.user.getAllMessages().size());
+			this.user.addReceivedMessage(this.messageID, this.message);
 			
-//			userReceivedMessages.put(this.message.getMessageID(), this.message);
-//			this.user.updateReceivedMessage(userReceivedMessages);
+			Path requestedFilepath = getFilepath();
 			
-//			System.out.println("AFTER UPDATE RECEIVED MESSAGES: " + this.user.getAllMessages().size());
-			
-			// if the user wants certain data formats
-			if (!this.wantFormats.isEmpty()) {
-				switch (messageType) {
-				
-					// if the message is a user announcing data
-					case Constants.ANNOUNCE_MESSAGE:
-						wantData(false);
-						break;
-					
-					case Constants.REQUEST_DATA:
-						break;
-					
-					case Constants.CAN_TRANSLATE:
-						wantConvertedData();
-						break;
-					default: break;
-				
-				}
+			if (requestedFilepath != null) {
+				hasRequestedData();
+			}
+		
+			if (!this.wantFormats.isEmpty() && requestedFilepath == null) {
+				wantsAndDoesNotHaveData();
 			}
 			
-			// if the user can convert data formats
 			if (!this.convertFormats.isEmpty()) {
-				switch (messageType) {
-				
-					case Constants.ANNOUNCE_MESSAGE:
-						convertDataAnnouncement();
-						break;
-
-					case Constants.REQUEST_DATA:
-						wantData(true);
-						break;
-				
-					default: break;
-				}
+				canConvertData();
 			}
 			
-//			if (Objects.equals(messageType, Constants.SENT_DATA)) {
-//				try {
-//					Wormhole.receive(message.getContent());
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//			}
+			if (Objects.equals(this.messageType, Constants.SENT_DATA)) {
+				// receive wormhole
+			}
+		}
+	}
+	
+	/**
+	 * The user has the data in the received message.
+	 */
+	private void hasRequestedData() {
+		switch (messageType) {
+			// a user is requesting the data
+			case Constants.REQUEST_DATA:
+				// send wormhole
+				break;
+			
+			// user wants the data converted
+			case Constants.CAN_TRANSLATE:
+				wantConvertedData();
+				break;
+				
+			default: break;
+		}
+	}
+	
+	/**
+	 * The user wants the data and does not already have it.
+	 */
+	private void wantsAndDoesNotHaveData() {
+		switch (messageType) {
+			// if the message is a user announcing data
+			case Constants.ANNOUNCE_MESSAGE:
+				wantData(false);
+				break;
+			// if another user announces they can convert the data
+			case Constants.CAN_TRANSLATE:
+				wantConvertedData();
+				break;
+	
+			default: break;
+		}
+	}
+	
+	/**
+	 * The user can convert the data format.
+	 */
+	private void canConvertData() {
+		switch (messageType) {
+			case Constants.ANNOUNCE_MESSAGE:
+				convertDataAnnouncement();
+				break;
+	
+			case Constants.REQUEST_DATA:
+				wantData(true);
+				break;
+		
+			default: break;
 		}
 	}
 	
@@ -135,8 +158,8 @@ public class ProcessMessage {
 		
 		List<String> requestWantFormats = this.wantFormats;
 		List<FileData> data = this.message.getFileData();
-		String messageID = this.message.getMessageID();
-		String originSenderID = this.message.getSenderID();
+		String requestMessageID = this.messageID;
+		String originSenderID = this.senderID;
 		
 		// if the user is requesting the original data from the user who has it
 		if (forConvert) {
@@ -148,7 +171,7 @@ public class ProcessMessage {
 			}
 			requestWantFormats = (List<String>) wantArgs[0];
 			data = (List<FileData>) wantArgs[1];
-			messageID = (String) wantArgs[2];
+			requestMessageID = (String) wantArgs[2];
 			originSenderID = (String) wantArgs[3];
 		}
 		
@@ -161,7 +184,7 @@ public class ProcessMessage {
 				Message requestMessage = new Message(this.userID, Constants.REQUEST_DATA);
 				requestMessage.addRequestFormats(requestWantFormats);
 				requestMessage.requestFile(filedata);
-				requestMessage.addOriginMessageID(messageID);
+				requestMessage.addOriginMessageID(requestMessageID);
 				requestMessage.addSourceUserID(originSenderID);
 				requestMessage.addContent("Requesting file '" + filename + "'");
 				this.connection.direct(requestMessage, originSenderID);
@@ -237,8 +260,8 @@ public class ProcessMessage {
 			}
 		}
 		
-		requestMessage.addOriginMessageID(this.message.getMessageID());
-		requestMessage.addSourceUserID(this.message.getSenderID());
+		requestMessage.addOriginMessageID(this.messageID);
+		requestMessage.addSourceUserID(this.senderID);
 		requestMessage.addContent("I can convert the data from " + convertableFormats);
 		this.connection.announce(requestMessage);
 	}
@@ -273,8 +296,26 @@ public class ProcessMessage {
 			requestMessage.addOriginMessageID(this.message.getOriginMessageID());
 			requestMessage.addSourceUserID(this.message.getSourceUserID());
 			requestMessage.addContent("Requesting data to be converted to " + requestFormat);
-			this.connection.direct(requestMessage, this.message.getSenderID());
+			this.connection.direct(requestMessage, this.senderID);
 		}
+	}
+	
+	/**
+	 * Get the file path corresponding of the requested file.
+	 * 
+	 * @return		The path of the file wanted or null if not found.
+	 */
+	private Path getFilepath() {
+		for (Path path : this.filepaths) {
+			String filename = path.getFileName().toString();
+			for (FileData data : this.message.getFileData()) {
+				if (Objects.equals(data.getFileName(), filename)) {
+					return path;
+				}
+			}
+		}
+		
+		return null;
 	}
 
 }
