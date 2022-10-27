@@ -43,6 +43,13 @@ public final class Constants {
 	public static final String SOURCE_USER_ID			= "source_user_id";
 	public static final String TIMESTAMP				= "time_stamp";
 	
+	public static final String ORIGINAL_FORMAT			= "original_format";
+	public static final String DESTINATION_FORMATS		= "destination_formats";
+	public static final String FILENAME					= "filename";
+	public static final String FILESIZE					= "filesize";
+	
+	public static final String CONTENT					= "content";
+	
 	
 	// ************************
 	//

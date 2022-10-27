@@ -21,6 +21,8 @@ public class RabbitMQConnection {
 	private Channel channel;
 	private String queueName;
 	
+	private static final String SENT = " [x] Sent ";
+	
 	
 	/**
 	 * Constructor for creating a RabbitMQConnection.
@@ -46,39 +48,15 @@ public class RabbitMQConnection {
 	/**
 	 * Announce a message to all users connected.
 	 * 
-	 * @param message		The message to be sent.
+	 * @param message					The message to be sent.
 	 */
 	public void announce(Message message) {
 		try {
 			channel.basicPublish(Constants.EXCHANGE_NAME, Constants.ANNOUNCE_ROUTING_KEY, null, message.toJSON().getBytes());
-			String sent = String.format(" [x] Sent %s%n", message.toJSON());
-			sent += "To: Everyone\n";
+			String sent = SENT + message;
 			Constants.LOGGER.log(Level.ALL, sent);
-			System.out.println(sent);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				connection.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	/**
-	 * Announce a message to all users connected and stay connection.
-	 * 
-	 * @param message					The message to be sent.
-	 * @param initialAnnouncement		True if used to make initial announcement about data
-	 */
-	public void announce(Message message, boolean initalAnnouncement) {
-		try {
-			channel.basicPublish(Constants.EXCHANGE_NAME, Constants.ANNOUNCE_ROUTING_KEY, null, message.toJSON().getBytes());
-			String sent = String.format(" [x] Sent %s", message.toString());
-			sent += "To: Everyone\n";
-			Constants.LOGGER.log(Level.ALL, sent);
-			System.out.println(sent);
+			System.out.print(sent);
+			System.out.println("To: Everyone\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -93,18 +71,12 @@ public class RabbitMQConnection {
 	public void direct(Message message, String userID) {
 		try {
 			channel.basicPublish(Constants.EXCHANGE_NAME, userID, null, message.toJSON().getBytes());
-			String sent = String.format(" [x] Sent %s", message.toString());
-			sent += String.format("To: %s \n", userID);
+			String sent = SENT + message;
 			Constants.LOGGER.log(Level.ALL, sent);
-			System.out.println(sent);
+			System.out.print(sent);
+			System.out.println("To: " + userID + "\n");
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			try {
-				connection.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 	

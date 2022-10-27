@@ -73,7 +73,7 @@ public class ResearchAPI {
 					announceData.addFilePath(filepath.toString());
 				}
 				announceData.addContent("I have data.");
-				this.connection.announce(announceData, true);
+				this.connection.announce(announceData);
 			}
 		} catch (IOException | TimeoutException e) {
 			e.printStackTrace();

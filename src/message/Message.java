@@ -10,7 +10,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -130,8 +129,8 @@ public class Message {
 	 */
 	public String toJSON() {
 		JSONObject message = new JSONObject();
-		message.put("metadata", metadata.toJSON());
-		message.put("content", content);
+		message.put(Constants.METADATA, metadata.toJSON());
+		message.put(Constants.CONTENT, content);
 		return message.toString();
 	}
 	
@@ -149,9 +148,9 @@ public class Message {
 	public Message(String message) {
 		JSONObject root = new JSONObject(message);
 		
-		JSONObject metadataJSON = root.getJSONObject("metadata");
+		JSONObject metadataJSON = root.getJSONObject(Constants.METADATA);
 		metadata = new Metadata(metadataJSON);
-		content = root.getString("content");
+		content = root.getString(Constants.CONTENT);
 	}
 	
 	/**
@@ -375,8 +374,8 @@ public class Message {
 			
 			for (FileData file : this.data) {
 				JSONObject currFileData = new JSONObject();
-				currFileData.put("filename", file.getFileName());
-				currFileData.put("filesize", file.getFileSize());
+				currFileData.put(Constants.FILENAME, file.getFileName());
+				currFileData.put(Constants.FILESIZE, file.getFileSize());
 				filedata.put(currFileData);
 			}
 			return filedata;
@@ -396,8 +395,8 @@ public class Message {
 				for (String destFormat : entry.getValue()) {
 					destinationFormats.put(destFormat);
 				}
-				currConvert.put("original_format", entry.getKey());
-				currConvert.put("destination_formats", destinationFormats);
+				currConvert.put(Constants.ORIGINAL_FORMAT, entry.getKey());
+				currConvert.put(Constants.DESTINATION_FORMATS, destinationFormats);
 				convert.put(currConvert);
 			}
 			return convert;
@@ -448,8 +447,8 @@ public class Message {
 		 */
 		private void setData(JSONArray filedata) {
 			for (Object file : filedata) {
-				String filename = ((JSONObject) file).getString("filename");
-				String filesize = Integer.toString(((JSONObject) file).getInt("filesize"));
+				String filename = ((JSONObject) file).getString(Constants.FILENAME);
+				String filesize = Integer.toString(((JSONObject) file).getInt(Constants.FILESIZE));
 				this.data.add(new FileData(filename, filesize));
 			}
 			
@@ -474,10 +473,10 @@ public class Message {
 		private void setDataConvertFormats(JSONArray dataConvertFormats) {
 			for (Object convert : dataConvertFormats) {
 				ArrayList<String> destFormats = new ArrayList<>();
-				for (Object toFormat: ((JSONObject) convert).getJSONArray("destination_formats")) {
+				for (Object toFormat: ((JSONObject) convert).getJSONArray(Constants.DESTINATION_FORMATS)) {
 					destFormats.add(toFormat.toString());
 				}
-				this.dataConvertFormats.put(((JSONObject) convert).getString("original_format"), destFormats);
+				this.dataConvertFormats.put(((JSONObject) convert).getString(Constants.ORIGINAL_FORMAT), destFormats);
 			}
 		}
 		

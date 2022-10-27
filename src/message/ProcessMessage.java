@@ -90,7 +90,7 @@ public class ProcessMessage {
 			}
 			
 			if (Objects.equals(this.messageType, Constants.SENT_DATA)) {
-				// receive wormhole
+				Wormhole.receive(this.message.getContent());
 			}
 		}
 	}
@@ -99,7 +99,7 @@ public class ProcessMessage {
 	 * The user has the data in the received message.
 	 */
 	private void hasRequestedData() {
-		switch (messageType) {
+		switch (this.messageType) {
 			// a user is requesting the data
 			case Constants.REQUEST_DATA:
 				// send wormhole
@@ -118,7 +118,7 @@ public class ProcessMessage {
 	 * The user wants the data and does not already have it.
 	 */
 	private void wantsAndDoesNotHaveData() {
-		switch (messageType) {
+		switch (this.messageType) {
 			// if the message is a user announcing data
 			case Constants.ANNOUNCE_MESSAGE:
 				wantData(false);
@@ -136,7 +136,7 @@ public class ProcessMessage {
 	 * The user can convert the data format.
 	 */
 	private void canConvertData() {
-		switch (messageType) {
+		switch (this.messageType) {
 			case Constants.ANNOUNCE_MESSAGE:
 				convertDataAnnouncement();
 				break;
@@ -154,6 +154,7 @@ public class ProcessMessage {
 	 * 
 	 * @param forConvert		True if the user is requesting the data from the user for converting. False otherwise.
 	 */
+	@SuppressWarnings("unchecked")
 	private void wantData(boolean forConvert) {
 		
 		List<String> requestWantFormats = this.wantFormats;
