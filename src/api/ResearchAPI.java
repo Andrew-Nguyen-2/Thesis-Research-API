@@ -43,12 +43,18 @@ public class ResearchAPI {
 	}
 	
 	/**
-	 * Add the file path of data to share.
+	 * Add the file path of data to share and make an announcement.
 	 * 
 	 * @param filepath		The full file path of the data.
 	 */
 	public void addFile(String filepath) {
 		this.user.addFilepaths(filepath);
+		Message announceData = new Message(this.user.getUserID(), Constants.ANNOUNCE_MESSAGE);
+		for (Path path : this.user.getFilepaths()) {
+			announceData.addFilePath(path.toString());
+		}
+		announceData.addContent("I have data.");
+		this.connection.announce(announceData);
 	}
 	
 	/**
@@ -67,14 +73,6 @@ public class ResearchAPI {
 	public void connect() {
 		try {
 			this.connection = new RabbitMQConnection(this.user);
-			if (!this.user.getFilepaths().isEmpty()) {
-				Message announceData = new Message(this.user.getUserID(), Constants.ANNOUNCE_MESSAGE);
-				for (Path filepath : this.user.getFilepaths()) {
-					announceData.addFilePath(filepath.toString());
-				}
-				announceData.addContent("I have data.");
-				this.connection.announce(announceData);
-			}
 		} catch (IOException | TimeoutException e) {
 			e.printStackTrace();
 		}

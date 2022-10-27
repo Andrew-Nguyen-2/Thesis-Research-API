@@ -9,7 +9,7 @@ public class Wormhole {
 	
 	private Wormhole () {}
 	
-	public static void receive(String command) {
+	public static void receive(String command, String filename) {
 		File receivedDir = new File(cwd, "received-files");
 		
 		if (!receivedDir.exists()) {

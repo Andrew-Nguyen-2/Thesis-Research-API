@@ -90,7 +90,8 @@ public class ProcessMessage {
 			}
 			
 			if (Objects.equals(this.messageType, Constants.SENT_DATA)) {
-				Wormhole.receive(this.message.getContent());
+				String filename = this.message.getFileData().get(0).getFileName();
+				Wormhole.receive(this.message.getContent(), filename);
 			}
 		}
 	}
@@ -102,7 +103,7 @@ public class ProcessMessage {
 		switch (this.messageType) {
 			// a user is requesting the data
 			case Constants.REQUEST_DATA:
-				// send wormhole
+				// TODO send wormhole
 				break;
 			
 			// user wants the data converted
