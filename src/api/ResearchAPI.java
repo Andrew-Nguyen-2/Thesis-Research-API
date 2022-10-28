@@ -49,6 +49,9 @@ public class ResearchAPI {
 	 */
 	public void addFile(String filepath) {
 		this.user.addFilepaths(filepath);
+		if (this.connection == null) {
+			connect();
+		}
 		Message announceData = new Message(this.user.getUserID(), Constants.ANNOUNCE_MESSAGE);
 		for (Path path : this.user.getFilepaths()) {
 			announceData.addFilePath(path.toString());

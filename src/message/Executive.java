@@ -63,10 +63,12 @@ public class Executive {
 				printWriter.write("echo " + _cwdToFollow + "\n");
 				printWriter.write("cd " + _cwd + "\n");
 				printWriter.write("pwd" + "\n");
+				
+				// have to add to path because homebrew is in opt directory on M1 Macs
+				// need to find a way to do it dynamically to work for all users
 				String path = System.getenv("PATH") + ":/opt/homebrew/bin:/opt/homebrew/sbin";
 				printWriter.write("export PATH=" + path + "\n");
 				printWriter.write("echo $PATH\n");
-				printWriter.write("echo checking brew\n");
 			}
 
 			printWriter.write(command + "\n");
