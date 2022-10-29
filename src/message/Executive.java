@@ -18,7 +18,12 @@ public class Executive {
 	
 
 	// special command
-	private static final String _cwdToFollow = "CWD_TO_FOLLOW";
+	private static final String _cwdToFollow  = "CWD_TO_FOLLOW";
+	
+	// M1 Mac paths
+	private static final String HOMEBREW_BIN  = "/opt/homebrew/bin";
+	private static final String HOMEBREW_SBIN = "/opt/homebrew/sbin";
+	private static final String HOMEBREW_PATH = ":/opt/homebrew/bin:/opt/homebrew/sbin";
 
 	
 	//current working dir
@@ -46,6 +51,16 @@ public class Executive {
 		return osName.toLowerCase().startsWith("mac");
 	}
 	
+	/**
+	 * Check if we are running on an M1 Mac
+	 * @return		true if we are running on an M1 Mac
+	 */
+	private boolean isM1() {
+		File brewBin = new File(HOMEBREW_BIN);
+		File brewSBin = new File(HOMEBREW_SBIN);
+		return brewBin.exists() && brewBin.isDirectory() && brewSBin.exists() && brewSBin.isDirectory();
+	}
+	
 
 	// build a script file around the command
 	//the command is execute in its own process
@@ -64,10 +79,11 @@ public class Executive {
 				printWriter.write("cd " + _cwd + "\n");
 				printWriter.write("pwd" + "\n");
 				
-				// have to add to path because homebrew is in opt directory on M1 Macs
-				// need to find a way to do it dynamically to work for all users
-				String path = System.getenv("PATH") + ":/opt/homebrew/bin:/opt/homebrew/sbin";
-				printWriter.write("export PATH=" + path + "\n");
+				// update environment path if running on M1 Mac
+				if (isMac() && isM1()) {
+					String path = System.getenv("PATH") + HOMEBREW_PATH;
+					printWriter.write("export PATH=" + path + "\n");
+				}
 			}
 
 			printWriter.write(command + "\n");
