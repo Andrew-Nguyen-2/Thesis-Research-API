@@ -68,7 +68,6 @@ public class Executive {
 				// need to find a way to do it dynamically to work for all users
 				String path = System.getenv("PATH") + ":/opt/homebrew/bin:/opt/homebrew/sbin";
 				printWriter.write("export PATH=" + path + "\n");
-				printWriter.write("echo $PATH\n");
 			}
 
 			printWriter.write(command + "\n");
