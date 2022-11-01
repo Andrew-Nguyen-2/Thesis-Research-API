@@ -78,7 +78,7 @@ public class ProcessMessage {
 			Path requestedFilepath = getFilepath();
 			
 			if (requestedFilepath != null) {
-				hasRequestedData();
+				hasRequestedData(requestedFilepath);
 			}
 		
 			if (!this.wantFormats.isEmpty() && requestedFilepath == null) {
@@ -98,12 +98,14 @@ public class ProcessMessage {
 	
 	/**
 	 * The user has the data in the received message.
+	 * 
+	 * @param filepath		The path of the file another user wants.
 	 */
-	private void hasRequestedData() {
+	private void hasRequestedData(Path filepath) {
 		switch (this.messageType) {
 			// a user is requesting the data
 			case Constants.REQUEST_DATA:
-				// TODO send wormhole
+				Wormhole.send(connection, this.userID, this.message.getSenderID(), filepath, this.message.getOriginMessageID());
 				break;
 			
 			// user wants the data converted

@@ -1,8 +1,11 @@
 package message;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+
+import rabbitmq.RabbitMQConnection;
 
 
 public class Wormhole {
@@ -11,6 +14,12 @@ public class Wormhole {
 	
 	private Wormhole () {}
 	
+	/**
+	 * Receive the file a user is sending.
+	 * 
+	 * @param command		The command to execute 'wormhole receive'.
+	 * @param filename		The name of the file being received.
+	 */
 	public static void receive(String command, String filename) {
 		StringBuilder commandBuilder = new StringBuilder(command);
 		File receivedDir = new File(cwd, "received-files");
@@ -37,5 +46,14 @@ public class Wormhole {
 		}
 		
 		Executive.execute(commandBuilder.toString(), receivedDir);
+	}
+	
+	public static void send(RabbitMQConnection connection, String userID, String requestUserID, Path filepath, String originMessageID) {
+		Executive.execute("wormhole send " + filepath, new File(cwd), connection, userID, filepath, originMessageID, requestUserID);
+	}
+	
+	public static void main(String[] args) {
+		File newFile = new File(cwd, "test-files");
+		Executive.execute("wormhole send test-data.csv", newFile);
 	}
 }

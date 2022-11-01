@@ -5,6 +5,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import constants.Constants;
+import rabbitmq.RabbitMQConnection;
 
 /**
  * Just testing exec
@@ -29,6 +38,12 @@ public class Executive {
 	//current working dir
 	private String _cwd;
 	
+	private RabbitMQConnection connection;
+	private String userID;
+	private String filepath;
+	private String originMessageID;
+	private String requestUserID;
+	
 	public Executive() {
 		done = false;
 	}
@@ -39,6 +54,26 @@ public class Executive {
 	 */
 	public void setCWD(String cwd) {
 		_cwd = cwd;
+	}
+	
+	public void setConnection(RabbitMQConnection connection) {
+		this.connection = connection;
+	}
+	
+	public void setUserID(String userID) {
+		this.userID = userID;
+	}
+	
+	public void setFilepath(String filepath) {
+		this.filepath = filepath;
+	}
+	
+	public void setOriginMessageID(String originMessageID) {
+		this.originMessageID = originMessageID;
+	}
+	
+	public void setRequestUserID(String requestUserID) {
+		this.requestUserID = requestUserID;
 	}
 	
 	/**
@@ -61,6 +96,16 @@ public class Executive {
 		return brewBin.exists() && brewBin.isDirectory() && brewSBin.exists() && brewSBin.isDirectory();
 	}
 	
+	// send the message to the user requesting the data with the "wormhole receive" command
+	private void sendMessage(String line) {
+		Message sendData = new Message(userID, Constants.SENT_DATA);
+		sendData.addFilePath(filepath);
+		sendData.addOriginMessageID(originMessageID);
+		sendData.addSourceUserID(userID);
+		sendData.addContent(line);
+		connection.direct(sendData, requestUserID);
+	}
+	
 
 	// build a script file around the command
 	//the command is execute in its own process
@@ -78,12 +123,12 @@ public class Executive {
 				printWriter.write("echo " + _cwdToFollow + "\n");
 				printWriter.write("cd " + _cwd + "\n");
 				printWriter.write("pwd" + "\n");
-				
-				// update environment path if running on M1 Mac
-				if (isMac() && isM1()) {
-					String path = System.getenv("PATH") + HOMEBREW_PATH;
-					printWriter.write("export PATH=" + path + "\n");
-				}
+			}
+			
+			// update environment path if running on M1 Mac
+			if (isMac() && isM1()) {
+				String path = System.getenv("PATH") + HOMEBREW_PATH;
+				printWriter.write("export PATH=" + path + "\n");
 			}
 
 			printWriter.write(command + "\n");
@@ -105,12 +150,14 @@ public class Executive {
 		}
 
 		try {
-			process = Runtime.getRuntime().exec("bash " + file.getPath());
-
+			ProcessBuilder pb = new ProcessBuilder();
+			pb.command("bash", file.getPath());
+			pb.redirectErrorStream(true);
+			process = pb.start();
 			if (process == null) {
 				return;
 			}
-
+			
 			final BufferedReader stdOutReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			final BufferedReader stdErrReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
@@ -141,6 +188,9 @@ public class Executive {
 							String line = stdOutReader.readLine();
 							if (line != null) {
 								System.out.println(line);
+								if (line.contains("wormhole receive")) {
+									sendMessage(line);
+								}
 							} else {
 								try {
 									Thread.sleep(50);
@@ -192,6 +242,7 @@ public class Executive {
 
 	}
 	
+	
 	/**
 	 * Execute a command in its own process
 	 * 
@@ -208,6 +259,57 @@ public class Executive {
 
 		executive.execute(command);
 
+	}
+	
+	/**
+	 * Execute a command in its own process
+	 * 
+	 * @param command the command
+	 * @param dir first cd to this directory (if not null)
+	 */
+	public static void execute(final String command, File dir, RabbitMQConnection connection, String userID, Path filepath, String originMessageID, String requestUserID) {
+		
+		Executive executive = new Executive();
+		if ((dir != null) && dir.exists() && dir.isDirectory()) {
+			executive.setCWD(dir.getPath());
+		}
+		
+		executive.setRequestUserID(requestUserID);
+		executive.setOriginMessageID(originMessageID);
+		executive.setFilepath(filepath.toString());
+		executive.setUserID(userID);
+		executive.setConnection(connection);
+		executive.execute(command);
+
+	}
+
+	public static void test(final String command, File dir) {
+		List<String> commands = new ArrayList<>();
+		commands.add("/bin/bash");
+		commands.add("-c");
+		commands.add(command);
+		
+		
+//		ProcessBuilder pb = new ProcessBuilder(commands);
+//		pb.redirectErrorStream(true);
+//		pb.directory(dir);
+//		Map<String, String> environment = pb.environment();
+//		environment.put("PATH", environment.get("PATH") + Executive.HOMEBREW_PATH);
+//		try {
+//			Process process = pb.start();
+//			var reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//			try {
+//				String line;
+//				while ((line = reader.readLine()) != null) {
+//					System.out.println(line);
+//				}
+//				process.waitFor();
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 	}
 	
 
