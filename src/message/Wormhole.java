@@ -48,12 +48,15 @@ public class Wormhole {
 		Executive.execute(commandBuilder.toString(), receivedDir);
 	}
 	
-	public static void send(RabbitMQConnection connection, String userID, String requestUserID, Path filepath, String originMessageID) {
-		Executive.execute("wormhole send " + filepath, new File(cwd), connection, userID, filepath, originMessageID, requestUserID);
-	}
-	
-	public static void main(String[] args) {
-		File newFile = new File(cwd, "test-files");
-		Executive.execute("wormhole send test-data.csv", newFile);
+	/**
+	 * Send the file the user is requesting.
+	 * 
+	 * @param connection		The RabbitMQ connection corresponding to the user.
+	 * @param userID			The ID of the user sending the data.
+	 * @param message			The message the user received requesting the data.
+	 * @param filepath			The path of the file the user is requesting.
+	 */
+	public static void send(RabbitMQConnection connection, String userID, Message message, Path filepath) {
+		Executive.execute("wormhole send " + filepath, new File(cwd), connection, userID, message, filepath);
 	}
 }

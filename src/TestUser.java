@@ -7,6 +7,7 @@ public class TestUser {
 		
 		user.connect();
 //		user.addConvertFormat("csv", "json");
+		user.addWantFormats("csv");
 		user.addFile("/Users/andrewnguyen/eclipse-workspace/research/test-files/test-data.csv");
 		user.getNextMessage();
 	}

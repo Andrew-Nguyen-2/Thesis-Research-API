@@ -105,7 +105,7 @@ public class ProcessMessage {
 		switch (this.messageType) {
 			// a user is requesting the data
 			case Constants.REQUEST_DATA:
-				Wormhole.send(connection, this.userID, this.message.getSenderID(), filepath, this.message.getOriginMessageID());
+				Wormhole.send(connection, this.userID, this.message, filepath);
 				break;
 			
 			// user wants the data converted

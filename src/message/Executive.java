@@ -5,12 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 import constants.Constants;
 import rabbitmq.RabbitMQConnection;
@@ -56,24 +51,37 @@ public class Executive {
 		_cwd = cwd;
 	}
 	
+	/**
+	 * Set the user's RabbitMQ Connection.
+	 * @param connection		The connection corresponding to the user.
+	 */
 	public void setConnection(RabbitMQConnection connection) {
 		this.connection = connection;
 	}
 	
+	/**
+	 * Set the ID the of the user.
+	 * @param userID
+	 */
 	public void setUserID(String userID) {
 		this.userID = userID;
 	}
 	
+	/**
+	 * Set the path where the file is located.
+	 * @param filepath
+	 */
 	public void setFilepath(String filepath) {
 		this.filepath = filepath;
 	}
 	
-	public void setOriginMessageID(String originMessageID) {
-		this.originMessageID = originMessageID;
-	}
-	
-	public void setRequestUserID(String requestUserID) {
-		this.requestUserID = requestUserID;
+	/**
+	 * Set the message that the user received.
+	 * @param message
+	 */
+	public void setRequiredMessageContent(Message message) {
+		this.originMessageID = message.getOriginMessageID();
+		this.requestUserID = message.getSenderID();
 	}
 	
 	/**
@@ -242,7 +250,6 @@ public class Executive {
 
 	}
 	
-	
 	/**
 	 * Execute a command in its own process
 	 * 
@@ -267,49 +274,19 @@ public class Executive {
 	 * @param command the command
 	 * @param dir first cd to this directory (if not null)
 	 */
-	public static void execute(final String command, File dir, RabbitMQConnection connection, String userID, Path filepath, String originMessageID, String requestUserID) {
+	public static void execute(final String command, File dir, RabbitMQConnection connection, String userID, Message message, Path filepath) {
 		
 		Executive executive = new Executive();
 		if ((dir != null) && dir.exists() && dir.isDirectory()) {
 			executive.setCWD(dir.getPath());
 		}
 		
-		executive.setRequestUserID(requestUserID);
-		executive.setOriginMessageID(originMessageID);
+		executive.setRequiredMessageContent(message);
 		executive.setFilepath(filepath.toString());
 		executive.setUserID(userID);
 		executive.setConnection(connection);
 		executive.execute(command);
 
-	}
-
-	public static void test(final String command, File dir) {
-		List<String> commands = new ArrayList<>();
-		commands.add("/bin/bash");
-		commands.add("-c");
-		commands.add(command);
-		
-		
-//		ProcessBuilder pb = new ProcessBuilder(commands);
-//		pb.redirectErrorStream(true);
-//		pb.directory(dir);
-//		Map<String, String> environment = pb.environment();
-//		environment.put("PATH", environment.get("PATH") + Executive.HOMEBREW_PATH);
-//		try {
-//			Process process = pb.start();
-//			var reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//			try {
-//				String line;
-//				while ((line = reader.readLine()) != null) {
-//					System.out.println(line);
-//				}
-//				process.waitFor();
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
 	}
 	
 
