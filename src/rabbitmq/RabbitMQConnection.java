@@ -31,24 +31,27 @@ public class RabbitMQConnection {
 	 * @throws IOException
 	 * @throws TimeoutException
 	 */
-	public RabbitMQConnection(User user) throws IOException, TimeoutException {
+	public RabbitMQConnection(User user, String username) throws IOException, TimeoutException {
 		this.user = user;
-		ConnectionFactory factory = new ConnectionFactory();     
-		factory.setHost("137.155.2.201");                            
-		connection = factory.newConnection();        
-		channel = connection.createChannel();                    
+		ConnectionFactory factory = new ConnectionFactory();
+//		String ssh = "ssh -L 5672:localhost:5672 " + username + "@jlabdaq.pcs.cnu.edu";
+//		Executive.execute(ssh, null);
+		factory.setHost("137.155.2.201");
+//		factory.setHost("localhost");
+		connection = factory.newConnection();
+		channel = connection.createChannel();
 		                                                         
-		channel.exchangeDeclare(Constants.EXCHANGE_NAME, Constants.EXCHANGE_TYPE);              
-		queueName = channel.queueDeclare().getQueue();    
+		channel.exchangeDeclare(Constants.EXCHANGE_NAME, Constants.EXCHANGE_TYPE);
+		queueName = channel.queueDeclare().getQueue();
 		                                                         
-		channel.queueBind(queueName, Constants.EXCHANGE_NAME, Constants.ANNOUNCE_ROUTING_KEY);      
+		channel.queueBind(queueName, Constants.EXCHANGE_NAME, Constants.ANNOUNCE_ROUTING_KEY);
 		channel.queueBind(queueName, Constants.EXCHANGE_NAME, this.user.getUserID());
 	}
 	
 	/**
 	 * Announce a message to all users connected.
 	 * 
-	 * @param message					The message to be sent.
+	 * @param message		The message to be sent.
 	 */
 	public void announce(Message message) {
 		try {

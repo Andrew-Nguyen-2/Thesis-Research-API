@@ -104,13 +104,16 @@ public class Executive {
 		return brewBin.exists() && brewBin.isDirectory() && brewSBin.exists() && brewSBin.isDirectory();
 	}
 	
-	// send the message to the user requesting the data with the "wormhole receive" command
-	private void sendMessage(String line) {
+	/**
+	 * Send the message to the user requesting the data with the "wormhole receive" command
+	 * @param command		the command the other user will use to receive the data
+	 */
+	private void sendMessage(String command) {
 		Message sendData = new Message(userID, Constants.SENT_DATA);
 		sendData.addFilePath(filepath);
 		sendData.addOriginMessageID(originMessageID);
 		sendData.addSourceUserID(userID);
-		sendData.addContent(line);
+		sendData.addContent(command);
 		connection.direct(sendData, requestUserID);
 	}
 	
@@ -271,8 +274,12 @@ public class Executive {
 	/**
 	 * Execute a command in its own process
 	 * 
-	 * @param command the command
-	 * @param dir first cd to this directory (if not null)
+	 * @param command 		the command
+	 * @param dir 			first cd to this directory (if not null)
+	 * @param connection	the rabbitmq connection for this user
+	 * @param userID		the ID of the user
+	 * @param message		the message requesting the data
+	 * @param filepath		the file path where the data is held
 	 */
 	public static void execute(final String command, File dir, RabbitMQConnection connection, String userID, Message message, Path filepath) {
 		

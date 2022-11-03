@@ -21,9 +21,10 @@ import user.User;
 
 public class ResearchAPI {
 	
-	private User 								user;
-	private RabbitMQConnection 					connection;
-	private Queue<String> 						messageQueue;
+	private User 				user;
+	private RabbitMQConnection 	connection;
+	private Queue<String> 		messageQueue;
+	private String				username;
 	
 	/**
 	 * Constructor for creating a ResearchAPI instance.
@@ -50,7 +51,7 @@ public class ResearchAPI {
 	public void addFile(String filepath) {
 		this.user.addFilepaths(filepath);
 		if (this.connection == null) {
-			connect();
+			connect(this.username);
 		}
 		Message announceData = new Message(this.user.getUserID(), Constants.ANNOUNCE_MESSAGE);
 		for (Path path : this.user.getFilepaths()) {
@@ -73,9 +74,10 @@ public class ResearchAPI {
 	/**
 	 * Connect to the RabbitMQ server.
 	 */
-	public void connect() {
+	public void connect(String username) {
 		try {
-			this.connection = new RabbitMQConnection(this.user);
+			this.username = username;
+			this.connection = new RabbitMQConnection(this.user, this.username);
 		} catch (IOException | TimeoutException e) {
 			e.printStackTrace();
 		}
@@ -112,7 +114,7 @@ public class ResearchAPI {
 				}
 				try {
 					String message = messageQueue.remove();
-					ProcessMessage processMessage = new ProcessMessage(user, message);
+					ProcessMessage processMessage = new ProcessMessage(user, this.connection, message, this.username);
 					processMessage.process();
 				} catch (NoSuchElementException e) {
 					e.printStackTrace();

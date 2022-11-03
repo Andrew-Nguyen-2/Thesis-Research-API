@@ -1,13 +1,11 @@
 package message;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeoutException;
 
 import org.json.JSONObject;
 
@@ -41,7 +39,7 @@ public class ProcessMessage {
 	 * @param user			User receiving the message.
 	 * @param message		Received message.
 	 */
-	public ProcessMessage(User user, String message) {
+	public ProcessMessage(User user, RabbitMQConnection connection, String message, String username) {
 		this.user = user;
 		JSONObject root = new JSONObject(message);
 		JSONObject metadata = root.getJSONObject(Constants.METADATA);
@@ -58,12 +56,7 @@ public class ProcessMessage {
 			this.filepaths = this.user.getFilepaths();
 			this.wantFormats = this.user.getWantFormats();
 			this.convertFormats = this.user.getConvertFormats();
-			
-			try {
-				this.connection = new RabbitMQConnection(user);
-			} catch (IOException | TimeoutException e) {
-				e.printStackTrace();
-			}
+			this.connection = connection;
 		}
 	}
 	
