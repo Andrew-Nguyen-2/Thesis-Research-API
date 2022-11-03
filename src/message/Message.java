@@ -261,8 +261,8 @@ public class Message {
 		private ArrayList<String> 				dataRequestFormats		= new ArrayList<>();
 		private Map<String, ArrayList<String>>	dataConvertFormats		= new HashMap<>();
 		
-		private String 							originMessageID;
-		private String 							sourceUserID;
+		private String 							originMessageID			= "";
+		private String 							sourceUserID			= "";
 		
 		private String							timestamp;
 		
