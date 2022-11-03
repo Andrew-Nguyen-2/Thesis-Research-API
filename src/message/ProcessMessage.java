@@ -15,31 +15,32 @@ import user.User;
 
 public class ProcessMessage {
 	
-	private User user;
-	private Message message;
+	private User							user;
+	private Message 						message;
 	
 	// received message info
-	private String senderID;
-	private String messageType;
-	private String messageID;
+	private String 							senderID;
+	private String 							messageType;
+	private String 							messageID;
 	
 	// receiving user info
-	private String userID;
-	private List<Path> filepaths;
-	private List<String> wantFormats;
-	private Map<String, ArrayList<String>> convertFormats;
+	private String 							userID;
+	private List<Path> 						filepaths;
+	private List<String> 					wantFormats;
+	private Map<String, ArrayList<String>>	convertFormats;
 	
 	// connection to send message
-	private RabbitMQConnection connection;
+	private RabbitMQConnection 				connection;
 	
 	
 	/**
 	 * Constructor
 	 * 
 	 * @param user			User receiving the message.
+	 * @param connection	The RabbitMQ connection for this user.
 	 * @param message		Received message.
 	 */
-	public ProcessMessage(User user, RabbitMQConnection connection, String message, String username) {
+	public ProcessMessage(User user, RabbitMQConnection connection, String message) {
 		this.user = user;
 		JSONObject root = new JSONObject(message);
 		JSONObject metadata = root.getJSONObject(Constants.METADATA);
@@ -123,7 +124,7 @@ public class ProcessMessage {
 			case Constants.CAN_TRANSLATE:
 				wantConvertedData();
 				break;
-	
+
 			default: break;
 		}
 	}
@@ -139,6 +140,8 @@ public class ProcessMessage {
 	
 			case Constants.REQUEST_DATA:
 				wantData(true);
+				// TODO convert data format
+				// TODO send data to user requesting
 				break;
 		
 			default: break;

@@ -6,16 +6,6 @@ public final class Constants {
 	
 	// ***********************
 	//
-	//	      RabbitMQ
-	//
-	// ************************
-	
-	public static final String EXCHANGE_NAME 			= "milestone1";
-	public static final String EXCHANGE_TYPE 			= "topic";
-	public static final String ANNOUNCE_ROUTING_KEY 	= "announce";
-	
-	// ***********************
-	//
 	//		Message Types
 	//
 	// ************************
@@ -42,7 +32,6 @@ public final class Constants {
 	public static final String ORIGIN_MESSAGE_ID		= "origin_message_id";
 	public static final String SOURCE_USER_ID			= "source_user_id";
 	public static final String TIMESTAMP				= "time_stamp";
-	
 	public static final String ORIGINAL_FORMAT			= "original_format";
 	public static final String DESTINATION_FORMATS		= "destination_formats";
 	public static final String FILENAME					= "filename";
@@ -57,7 +46,7 @@ public final class Constants {
 	//
 	// ************************
 	
-	public static final Logger LOGGER				= Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	public static final Logger LOGGER					= Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private Constants() {}
 }

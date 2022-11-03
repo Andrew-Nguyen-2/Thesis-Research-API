@@ -73,6 +73,8 @@ public class ResearchAPI {
 	
 	/**
 	 * Connect to the RabbitMQ server.
+	 * 
+	 * @param username		The username of account on jlabdaq.
 	 */
 	public void connect(String username) {
 		try {
@@ -114,7 +116,7 @@ public class ResearchAPI {
 				}
 				try {
 					String message = messageQueue.remove();
-					ProcessMessage processMessage = new ProcessMessage(user, this.connection, message, this.username);
+					ProcessMessage processMessage = new ProcessMessage(user, this.connection, message);
 					processMessage.process();
 				} catch (NoSuchElementException e) {
 					e.printStackTrace();

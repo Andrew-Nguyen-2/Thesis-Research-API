@@ -16,36 +16,42 @@ import user.User;
 
 public class RabbitMQConnection {
 	
-	private User user;
-	private Connection connection;
-	private Channel channel;
-	private String queueName;
+	private static final String EXCHANGE_NAME 			= "milestone1";
+	private static final String EXCHANGE_TYPE 			= "topic";
+	private static final String ANNOUNCE_ROUTING_KEY	= "announce";
 	
-	private static final String SENT = " [x] Sent ";
+	private static final String	SENT 					= " [x] Sent ";
+	
+	private User 				user;
+	private Connection			connection;
+	private Channel 			channel;
+	private String 				queueName;
 	
 	
 	/**
 	 * Constructor for creating a RabbitMQConnection.
 	 * 
 	 * @param user				The user connecting to the RabbitMQ server.
+	 * @param username			The username of account on jlabdaq.
 	 * @throws IOException
 	 * @throws TimeoutException
 	 */
 	public RabbitMQConnection(User user, String username) throws IOException, TimeoutException {
 		this.user = user;
 		ConnectionFactory factory = new ConnectionFactory();
+		// TODO implement ssh tunneling
 //		String ssh = "ssh -L 5672:localhost:5672 " + username + "@jlabdaq.pcs.cnu.edu";
 //		Executive.execute(ssh, null);
-		factory.setHost("137.155.2.201");
 //		factory.setHost("localhost");
+		factory.setHost("137.155.2.201");
 		connection = factory.newConnection();
 		channel = connection.createChannel();
 		                                                         
-		channel.exchangeDeclare(Constants.EXCHANGE_NAME, Constants.EXCHANGE_TYPE);
+		channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE);
 		queueName = channel.queueDeclare().getQueue();
 		                                                         
-		channel.queueBind(queueName, Constants.EXCHANGE_NAME, Constants.ANNOUNCE_ROUTING_KEY);
-		channel.queueBind(queueName, Constants.EXCHANGE_NAME, this.user.getUserID());
+		channel.queueBind(queueName, EXCHANGE_NAME, ANNOUNCE_ROUTING_KEY);
+		channel.queueBind(queueName, EXCHANGE_NAME, this.user.getUserID());
 	}
 	
 	/**
@@ -55,7 +61,7 @@ public class RabbitMQConnection {
 	 */
 	public void announce(Message message) {
 		try {
-			channel.basicPublish(Constants.EXCHANGE_NAME, Constants.ANNOUNCE_ROUTING_KEY, null, message.toJSON().getBytes());
+			channel.basicPublish(EXCHANGE_NAME, ANNOUNCE_ROUTING_KEY, null, message.toJSON().getBytes());
 			String sent = SENT + message;
 			Constants.LOGGER.log(Level.ALL, sent);
 			System.out.print(sent);
@@ -73,7 +79,7 @@ public class RabbitMQConnection {
 	 */
 	public void direct(Message message, String userID) {
 		try {
-			channel.basicPublish(Constants.EXCHANGE_NAME, userID, null, message.toJSON().getBytes());
+			channel.basicPublish(EXCHANGE_NAME, userID, null, message.toJSON().getBytes());
 			String sent = SENT + message;
 			Constants.LOGGER.log(Level.ALL, sent);
 			System.out.print(sent);

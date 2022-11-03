@@ -21,8 +21,8 @@ import constants.Constants;
 
 public class Message {
 	
-	private Metadata metadata;
-	private String 	content;
+	private Metadata 	metadata;
+	private String 		content;
 	
 	// ****************************************
 	//
@@ -251,10 +251,10 @@ public class Message {
 	}
 	
 	private class Metadata {
-		private String userID;
+		private String 							userID;
 		
-		private String messageType;
-		private String messageID;
+		private String 							messageType;
+		private String 							messageID;
 		
 		private ArrayList<FileData> 			data					= new ArrayList<>();
 		
