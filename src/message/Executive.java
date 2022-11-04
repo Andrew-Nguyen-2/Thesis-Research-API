@@ -241,7 +241,6 @@ public class Executive {
 
 			};
 
-//			(new Thread(runnable)).start();
 			running = new Thread(runnable);
 			running.start();
 			(new Thread(reader)).start();
@@ -254,6 +253,10 @@ public class Executive {
 
 	}
 	
+	/**
+	 * Get the thread waiting for the process to finish
+	 * @return		the running thread
+	 */
 	private Thread getRunningThread() {
 		return this.running;
 	}
@@ -261,8 +264,9 @@ public class Executive {
 	/**
 	 * Execute a command in its own process
 	 * 
-	 * @param command the command
-	 * @param dir first cd to this directory (if not null)
+	 * @param command	the command
+	 * @param dir 		first cd to this directory (if not null)
+	 * @return 			the running thread
 	 */
 	public static Thread execute(final String command, File dir) {
 		
@@ -300,17 +304,4 @@ public class Executive {
 		executive.execute(command);
 
 	}
-	
-
-	//main program for testing
-	public static void main(String arg[]) {
-		if(isMac() ) {
-			execute("say -v Karen Hello Andrew", null);	
-		}
-		
-		//do an ls on home dir
-		File  homeDir = new File( System.getProperty("user.home"));
-		execute("ls -a",homeDir);
-	}
-
 }

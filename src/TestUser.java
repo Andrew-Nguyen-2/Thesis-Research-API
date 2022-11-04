@@ -9,8 +9,8 @@ public class TestUser {
 		user.addConvertFormat("csv", "json");
 //		user.addWantFormats("csv");
 //		user.addFile("/Users/andrewnguyen/eclipse-workspace/research/test-files/test-data.csv");
+		user.startListening();
 		while (true) {
-			user.getNextMessage();
 			String receivedFilepath = user.getReceivedFilepath();
 			if (receivedFilepath != null) {
 				System.out.println("\nreceivedFilepath: " + receivedFilepath + "\n");

@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 
-import com.rabbitmq.client.ConnectionFactory;
-
 import constants.Constants;
 
+import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
 
