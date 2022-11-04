@@ -113,40 +113,19 @@ public class ResearchAPI {
 	 * until the file has finished being transfered then set the received file name.
 	 */
 	public void getNextMessage() {
-		synchronized (this) {
-			while (messageQueue.isEmpty()) {
-				try {
-					wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-					Thread.currentThread().interrupt();
+		if (!messageQueue.isEmpty()) {
+			String message = messageQueue.remove();
+			ProcessMessage processMessage = new ProcessMessage(user, this.connection, message);
+			
+			// receivedObj contains the filename received and the running thread or null if user did not receive a file
+			ReceiveObj receiveObj = processMessage.process();
+			if (receiveObj != null) {
+				// wait until thread is finished before setting the filename
+				while(receiveObj.getRunningThread().isAlive()) {
+					
 				}
+				this.receivedFilename = receiveObj.getFilename();
 			}
-			try {
-				String message = messageQueue.remove();
-				ProcessMessage processMessage = new ProcessMessage(user, this.connection, message);
-				
-				// receivedObj contains the filename received and the running thread or null if user did not receive a file
-				ReceiveObj receiveObj = processMessage.process();
-				receivingFile(receiveObj);
-			} catch (NoSuchElementException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	private void receivingFile(ReceiveObj receiveObj) {
-		if (receiveObj != null) {
-			// wait until thread is finished before setting the filename
-			while(receiveObj.getRunningThread().isAlive()) {
-				try {
-					Thread.sleep(0);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-					Thread.currentThread().interrupt();
-				}
-			}
-			this.receivedFilename = receiveObj.getFilename();
 		}
 	}
 	
@@ -160,6 +139,7 @@ public class ResearchAPI {
 		File dir = new File(cwd, "received-files");
 		if (this.receivedFilename != null && dir.exists() && Arrays.asList(dir.list()).contains(this.receivedFilename)) {
 			File file = new File(dir, this.receivedFilename);
+			this.receivedFilename = null;
 			return file.toString();
 		}
 		return null;
@@ -191,7 +171,6 @@ public class ResearchAPI {
 					String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
 					synchronized (this.researchAPI) {
 						this.researchAPI.messageQueue.add(message);
-						this.researchAPI.notifyAll();
 					}
 				};
 				

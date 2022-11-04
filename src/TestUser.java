@@ -11,7 +11,11 @@ public class TestUser {
 //		user.addFile("/Users/andrewnguyen/eclipse-workspace/research/test-files/test-data.csv");
 		while (true) {
 			user.getNextMessage();
-			System.out.println("\nreceivedFilepath: " + user.getReceivedFilepath() + "\n");
+			String receivedFilepath = user.getReceivedFilepath();
+			if (receivedFilepath != null) {
+				System.out.println("\nreceivedFilepath: " + receivedFilepath + "\n");
+				// translate file data
+			}
 		}
 	}
 }
