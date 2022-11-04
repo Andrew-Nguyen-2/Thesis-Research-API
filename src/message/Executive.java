@@ -17,9 +17,9 @@ import rabbitmq.RabbitMQConnection;
  */
 public class Executive {
 
-	private boolean done;
-	private Process process;
-	
+	private boolean 			done;
+	private Process 			process;
+	private Thread				running;
 
 	// special command
 	private static final String _cwdToFollow  = "CWD_TO_FOLLOW";
@@ -29,15 +29,14 @@ public class Executive {
 	private static final String HOMEBREW_SBIN = "/opt/homebrew/sbin";
 	private static final String HOMEBREW_PATH = ":/opt/homebrew/bin:/opt/homebrew/sbin";
 
-	
 	//current working dir
-	private String _cwd;
+	private String 				_cwd;
 	
-	private RabbitMQConnection connection;
-	private String userID;
-	private String filepath;
-	private String originMessageID;
-	private String requestUserID;
+	private RabbitMQConnection 	connection;
+	private String 				userID;
+	private String 				filepath;
+	private String 				originMessageID;
+	private String 				requestUserID;
 	
 	public Executive() {
 		done = false;
@@ -242,7 +241,9 @@ public class Executive {
 
 			};
 
-			(new Thread(runnable)).start();
+//			(new Thread(runnable)).start();
+			running = new Thread(runnable);
+			running.start();
 			(new Thread(reader)).start();
 
 		} catch (Error error) {
@@ -253,13 +254,17 @@ public class Executive {
 
 	}
 	
+	private Thread getRunningThread() {
+		return this.running;
+	}
+	
 	/**
 	 * Execute a command in its own process
 	 * 
 	 * @param command the command
 	 * @param dir first cd to this directory (if not null)
 	 */
-	public static void execute(final String command, File dir) {
+	public static Thread execute(final String command, File dir) {
 		
 		Executive executive = new Executive();
 
@@ -268,7 +273,7 @@ public class Executive {
 		}
 
 		executive.execute(command);
-
+		return executive.getRunningThread();
 	}
 	
 	/**

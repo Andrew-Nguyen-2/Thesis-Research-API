@@ -42,8 +42,8 @@ public class RabbitMQConnection {
 		// TODO implement ssh tunneling
 //		String ssh = "ssh -L 5672:localhost:5672 " + username + "@jlabdaq.pcs.cnu.edu";
 //		Executive.execute(ssh, null);
-//		factory.setHost("localhost");
-		factory.setHost("137.155.2.201");
+		factory.setHost("localhost");
+//		factory.setHost("137.155.2.201");
 		connection = factory.newConnection();
 		channel = connection.createChannel();
 		                                                         

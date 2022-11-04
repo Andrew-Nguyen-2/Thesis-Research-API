@@ -1,8 +1,10 @@
 package api;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
@@ -15,6 +17,7 @@ import com.rabbitmq.client.DeliverCallback;
 import constants.Constants;
 import message.Message;
 import message.ProcessMessage;
+import message.Wormhole.ReceiveObj;
 import rabbitmq.RabbitMQConnection;
 import user.User;
 
@@ -25,6 +28,7 @@ public class ResearchAPI {
 	private RabbitMQConnection 	connection;
 	private Queue<String> 		messageQueue;
 	private String				username;
+	private String				receivedFilename;
 	
 	/**
 	 * Constructor for creating a ResearchAPI instance.
@@ -49,6 +53,11 @@ public class ResearchAPI {
 	 * @param filepath		The full file path of the data.
 	 */
 	public void addFile(String filepath) {
+		File file = new File(filepath);
+		if (!file.exists()) {
+			System.out.println("ERROR: filepath does not exist for: '" + filepath + "'");
+			return;
+		}
 		this.user.addFilepaths(filepath);
 		if (this.connection == null) {
 			connect(this.username);
@@ -80,6 +89,10 @@ public class ResearchAPI {
 		try {
 			this.username = username;
 			this.connection = new RabbitMQConnection(this.user, this.username);
+			MessageThread messageThread = new MessageThread(this);
+			messageThread.start();
+			Constants.LOGGER.log(Level.ALL, " [*] Began listening to RabbitMQ server.%n");
+			System.out.println(" [*] Began listening to RabbitMQ server. \n");
 		} catch (IOException | TimeoutException e) {
 			e.printStackTrace();
 		}
@@ -95,34 +108,61 @@ public class ResearchAPI {
 	}
 	
 	/**
-	 * Implements a MessageThread and sleeps until notified of a new message.
-	 * 
-	 * @return		The message received.
+	 * Wait until a message is received and get the message if one exists.
+	 * After processing the message, if user received a file, wait
+	 * until the file has finished being transfered then set the received file name.
 	 */
 	public void getNextMessage() {
-		MessageThread messageThread = new MessageThread(this);
-		messageThread.start();
-		Constants.LOGGER.log(Level.ALL, " [*] Began listening to RabbitMQ server.%n");
-		System.out.println(" [*] Began listening to RabbitMQ server. \n");
-		while (true) {
-			synchronized (this) {
-				while (messageQueue.isEmpty()) {
-					try {
-						wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-						Thread.currentThread().interrupt();
-					}
-				}
+		synchronized (this) {
+			while (messageQueue.isEmpty()) {
 				try {
-					String message = messageQueue.remove();
-					ProcessMessage processMessage = new ProcessMessage(user, this.connection, message);
-					processMessage.process();
-				} catch (NoSuchElementException e) {
+					wait();
+				} catch (InterruptedException e) {
 					e.printStackTrace();
+					Thread.currentThread().interrupt();
 				}
 			}
+			try {
+				String message = messageQueue.remove();
+				ProcessMessage processMessage = new ProcessMessage(user, this.connection, message);
+				
+				// receivedObj contains the filename received and the running thread or null if user did not receive a file
+				ReceiveObj receiveObj = processMessage.process();
+				receivingFile(receiveObj);
+			} catch (NoSuchElementException e) {
+				e.printStackTrace();
+			}
 		}
+	}
+	
+	private void receivingFile(ReceiveObj receiveObj) {
+		if (receiveObj != null) {
+			// wait until thread is finished before setting the filename
+			while(receiveObj.getRunningThread().isAlive()) {
+				try {
+					Thread.sleep(0);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					Thread.currentThread().interrupt();
+				}
+			}
+			this.receivedFilename = receiveObj.getFilename();
+		}
+	}
+	
+	/**
+	 * Get the received file path.
+	 * 
+	 * @return		The path where the file received is located.
+	 */
+	public String getReceivedFilepath() {
+		String cwd = System.getProperty("user.dir");
+		File dir = new File(cwd, "received-files");
+		if (this.receivedFilename != null && dir.exists() && Arrays.asList(dir.list()).contains(this.receivedFilename)) {
+			File file = new File(dir, this.receivedFilename);
+			return file.toString();
+		}
+		return null;
 	}
 	
 	private class MessageThread extends Thread {

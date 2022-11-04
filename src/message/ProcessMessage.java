@@ -10,6 +10,7 @@ import java.util.Objects;
 import org.json.JSONObject;
 
 import constants.Constants;
+import message.Wormhole.ReceiveObj;
 import rabbitmq.RabbitMQConnection;
 import user.User;
 
@@ -64,7 +65,7 @@ public class ProcessMessage {
 	/**
 	 * Directs to method for handling received message
 	 */
-	public void process() {
+	public ReceiveObj process() {
 		if (this.message != null) {
 			System.out.println(String.format(" [x] Received %s", this.message));
 			this.user.addReceivedMessage(this.messageID, this.message);
@@ -85,9 +86,10 @@ public class ProcessMessage {
 			
 			if (Objects.equals(this.messageType, Constants.SENT_DATA)) {
 				String filename = this.message.getFileData().get(0).getFileName();
-				Wormhole.receive(this.message.getContent(), filename);
+				return Wormhole.receive(this.message.getContent(), filename);
 			}
 		}
+		return null;
 	}
 	
 	/**

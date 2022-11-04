@@ -20,7 +20,7 @@ public class Wormhole {
 	 * @param command		The command to execute 'wormhole receive'.
 	 * @param filename		The name of the file being received.
 	 */
-	public static void receive(String command, String filename) {
+	public static ReceiveObj receive(String command, String filename) {
 		StringBuilder commandBuilder = new StringBuilder(command);
 		File receivedDir = new File(cwd, "received-files");
 		
@@ -45,7 +45,8 @@ public class Wormhole {
 			count++;
 		}
 		
-		Executive.execute(commandBuilder.toString(), receivedDir);
+		Thread running = Executive.execute(commandBuilder.toString(), receivedDir);
+		return new ReceiveObj(filename, running);
 	}
 	
 	/**
@@ -58,5 +59,24 @@ public class Wormhole {
 	 */
 	public static void send(RabbitMQConnection connection, String userID, Message message, Path filepath) {
 		Executive.execute("wormhole send " + filepath, new File(cwd), connection, userID, message, filepath);
+	}
+	
+	public static class ReceiveObj {
+		
+		private String filename;
+		private Thread running;
+		
+		public ReceiveObj(String filename, Thread running) {
+			this.filename = filename;
+			this.running = running;
+		}
+		
+		public String getFilename() {
+			return this.filename;
+		}
+		
+		public Thread getRunningThread() {
+			return this.running;
+		}
 	}
 }

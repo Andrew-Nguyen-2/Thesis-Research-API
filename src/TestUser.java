@@ -9,6 +9,9 @@ public class TestUser {
 		user.addConvertFormat("csv", "json");
 //		user.addWantFormats("csv");
 //		user.addFile("/Users/andrewnguyen/eclipse-workspace/research/test-files/test-data.csv");
-		user.getNextMessage();
+		while (true) {
+			user.getNextMessage();
+			System.out.println("\nreceivedFilepath: " + user.getReceivedFilepath() + "\n");
+		}
 	}
 }
