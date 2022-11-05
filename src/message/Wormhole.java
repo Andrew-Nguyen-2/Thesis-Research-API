@@ -14,6 +14,31 @@ public class Wormhole {
 	
 	private Wormhole () {}
 	
+	private static String checkFilename(List<String> existingFilenames, String filename) {
+		if (existingFilenames.contains(filename)) {
+			while (true) {
+				if (!existingFilenames.contains(filename))  {
+					return filename;
+				}
+				String[] filenameSplit = filename.split("[.]");
+				String name = filenameSplit[0];
+				String format = filenameSplit[1];
+				try {
+					// last character is an integer
+					String last = String.valueOf(name.charAt(name.length() - 1));
+					int fileNum = Integer.parseInt(last);
+					fileNum++;
+					filename = String.format("%s-%s.%s", name.substring(0, name.length() - 2), fileNum, format);
+				} catch (NumberFormatException e) {
+					// last character is not an integer
+					filename = String.format("%s-%s.%s", name, 2, format);
+				}
+			
+			}
+		}
+		return filename;
+	}
+	
 	/**
 	 * Receive the file a user is sending.
 	 * 
@@ -33,17 +58,9 @@ public class Wormhole {
 		
 		// check if filename already exists
 		List<String> existingFilenames = Arrays.asList(receivedDir.list());
-		int count = 2;
 		
-		while (true) {
-			if (!existingFilenames.contains(filename)) {
-				break;
-			}
-			String[] filenameSplit = filename.split("[.]");
-			filename = String.format("%s-%s.%s", filenameSplit[0], count, filenameSplit[1]);
-			commandBuilder.append(" -o " + filename);
-			count++;
-		}
+		filename = checkFilename(existingFilenames, filename);
+		commandBuilder.append(" -o " + filename);
 		
 		Thread running = Executive.execute(commandBuilder.toString(), receivedDir);
 		return new ReceiveObj(filename, running);

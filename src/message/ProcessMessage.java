@@ -190,6 +190,7 @@ public class ProcessMessage {
 				requestMessage.addSourceUserID(originSenderID);
 				requestMessage.addContent("Requesting file '" + filename + "'");
 				this.connection.direct(requestMessage, originSenderID);
+				break;
 			}
 		}
 	}

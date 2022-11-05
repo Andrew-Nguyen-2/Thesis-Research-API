@@ -6,7 +6,7 @@ public class TestUser {
 		ResearchAPI user = new ResearchAPI();
 		
 		user.connect("anguyen");
-		user.addConvertFormat("csv", "json");
+		user.addConvertFormat("csv", "png");
 //		user.addWantFormats("csv");
 //		user.addFile("/Users/andrewnguyen/eclipse-workspace/research/test-files/test-data.csv");
 		user.startListening();
