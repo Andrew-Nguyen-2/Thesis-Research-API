@@ -14,6 +14,11 @@ import message.Wormhole.ReceiveObj;
 import rabbitmq.RabbitMQConnection;
 import user.User;
 
+/**
+ * Process the received message.
+ * @author andrewnguyen
+ *
+ */
 public class ProcessMessage {
 	
 	private User							user;
@@ -63,7 +68,9 @@ public class ProcessMessage {
 	}
 	
 	/**
-	 * Directs to method for handling received message
+	 * Directs to methods for handling received message
+	 * 
+	 * @return A ReceiveObj object containing the received filename and thread that is running or null.
 	 */
 	public ReceiveObj process() {
 		if (this.message != null) {
@@ -142,8 +149,6 @@ public class ProcessMessage {
 	
 			case Constants.REQUEST_DATA:
 				wantData(true);
-				// TODO convert data format
-				// TODO send data to user requesting
 				break;
 		
 			default: break;

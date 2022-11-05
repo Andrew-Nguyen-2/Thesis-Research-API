@@ -19,6 +19,11 @@ import org.json.JSONObject;
 
 import constants.Constants;
 
+/**
+ * Used to generate messages for sending and to convert received messages.
+ * @author andrewnguyen
+ *
+ */
 public class Message {
 	
 	private Metadata 	metadata;

@@ -29,9 +29,10 @@ public class Executive {
 	private static final String HOMEBREW_SBIN = "/opt/homebrew/sbin";
 	private static final String HOMEBREW_PATH = ":/opt/homebrew/bin:/opt/homebrew/sbin";
 
-	//current working dir
+	// current working dir
 	private String 				_cwd;
 	
+	// for executing wormhole send
 	private RabbitMQConnection 	connection;
 	private String 				userID;
 	private String 				filepath;
@@ -95,7 +96,7 @@ public class Executive {
 	
 	/**
 	 * Check if we are running on an M1 Mac
-	 * @return		true if we are running on an M1 Mac
+	 * @return	<code>true</code> if we are running on an M1 Mac
 	 */
 	private boolean isM1() {
 		File brewBin = new File(HOMEBREW_BIN);
@@ -104,7 +105,7 @@ public class Executive {
 	}
 	
 	/**
-	 * Send the message to the user requesting the data with the "wormhole receive" command
+	 * Send the message to the user requesting the data containing the <i>"wormhole receive"</i> command
 	 * @param command		the command the other user will use to receive the data
 	 */
 	private void sendMessage(String command) {

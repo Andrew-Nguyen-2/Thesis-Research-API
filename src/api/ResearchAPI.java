@@ -19,6 +19,9 @@ import rabbitmq.RabbitMQConnection;
 import user.User;
 
 
+/**
+ * The entry point into the api.
+ */
 public class ResearchAPI {
 	
 	private User 				user;
@@ -100,7 +103,7 @@ public class ResearchAPI {
 	
 	/**
 	 * Get the received file path.
-	 * Place method call in a while true loop to constantly check if file has been received.
+	 * Place method call in a while true loop to continuously check if file has been received.
 	 * 
 	 * @return		The path where the file received is located.
 	 */

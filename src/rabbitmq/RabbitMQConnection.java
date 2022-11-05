@@ -13,6 +13,11 @@ import com.rabbitmq.client.Channel;
 import message.Message;
 import user.User;
 
+/**
+ * Connect to the RabbitMQ server.
+ * @author andrewnguyen
+ *
+ */
 public class RabbitMQConnection {
 	
 	private static final String EXCHANGE_NAME 			= "milestone1";

@@ -7,13 +7,24 @@ import java.util.List;
 
 import rabbitmq.RabbitMQConnection;
 
-
+/**
+ * Send and receive files using magic-wormhole.
+ * @author andrewnguyen
+ *
+ */
 public class Wormhole {
 	
 	private static String cwd = System.getProperty("user.dir");
 	
 	private Wormhole () {}
 	
+	/**
+	 * Changes filename if it already exists.
+	 * 
+	 * @param existingFilenames		The list of existing filenames in the directory.
+	 * @param filename				The filename received.
+	 * @return						The filename unchanged if it does not exist or the filename with a number at the end starting at 2.
+	 */
 	private static String checkFilename(List<String> existingFilenames, String filename) {
 		if (existingFilenames.contains(filename)) {
 			while (true) {
@@ -42,8 +53,9 @@ public class Wormhole {
 	/**
 	 * Receive the file a user is sending.
 	 * 
-	 * @param command		The command to execute 'wormhole receive'.
+	 * @param command		The <i>"wormhole receive"</i> command.
 	 * @param filename		The name of the file being received.
+	 * @return 				A ReceivedObj object containing the name of the file received and the running <i>wormhole receive</i> thread.
 	 */
 	public static ReceiveObj receive(String command, String filename) {
 		StringBuilder commandBuilder = new StringBuilder(command);
@@ -54,12 +66,14 @@ public class Wormhole {
 			receivedDir.mkdir();
 		}
 		
+		// to bypass "yes" input for wormhole receive
 		commandBuilder.append(" --accept-file");
 		
 		// check if filename already exists
 		List<String> existingFilenames = Arrays.asList(receivedDir.list());
-		
 		filename = checkFilename(existingFilenames, filename);
+		
+		// receive the file as the filename
 		commandBuilder.append(" -o " + filename);
 		
 		Thread running = Executive.execute(commandBuilder.toString(), receivedDir);
@@ -77,6 +91,7 @@ public class Wormhole {
 	public static void send(RabbitMQConnection connection, String userID, Message message, Path filepath) {
 		Executive.execute("wormhole send " + filepath, new File(cwd), connection, userID, message, filepath);
 	}
+	
 	
 	public static class ReceiveObj {
 		

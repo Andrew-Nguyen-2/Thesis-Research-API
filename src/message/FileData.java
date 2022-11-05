@@ -1,6 +1,11 @@
 package message;
 
 
+/**
+ * Object to hold the file data.
+ * @author andrewnguyen
+ *
+ */
 public class FileData {
 	
 	private String filename;

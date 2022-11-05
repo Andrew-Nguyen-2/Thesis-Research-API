@@ -11,7 +11,11 @@ import java.util.UUID;
 
 import message.Message;
 
-
+/**
+ * Create a user and store their information.
+ * @author andrewnguyen
+ *
+ */
 public class User {
 	private String 							userID;
 	
