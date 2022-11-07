@@ -113,8 +113,25 @@ public class ResearchAPI {
 		// check receivedFilename is set, received files directory exists, and filename exists within the directory
 		if (this.receivedFilename != null && dir.exists() && Arrays.asList(dir.list()).contains(this.receivedFilename)) {
 			File file = new File(dir, this.receivedFilename);
-			this.receivedFilename = null;
 			return file.toString();
+		}
+		return null;
+	}
+	
+	/**
+	 * Get the received file path.
+	 * Place method call in a while true loop to continuously check if file has been received.
+	 * 
+	 * @return		The path where the file received is located.
+	 */
+	public String getReceivedFileFormat() {
+		String cwd = System.getProperty("user.dir");
+		File dir = new File(cwd, "received-files");
+		// check receivedFilename is set, received files directory exists, and filename exists within the directory
+		if (this.receivedFilename != null && dir.exists() && Arrays.asList(dir.list()).contains(this.receivedFilename)) {
+			File file = new File(dir, this.receivedFilename);
+			this.receivedFilename = null;
+			return file.getName().split("[.]")[1];
 		}
 		return null;
 	}

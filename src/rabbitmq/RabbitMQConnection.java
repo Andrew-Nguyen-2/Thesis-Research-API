@@ -50,7 +50,7 @@ public class RabbitMQConnection {
 //		factory.setHost("137.155.2.201");
 		connection = factory.newConnection();
 		channel = connection.createChannel();
-		                                                         
+                 
 		channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE);
 		queueName = channel.queueDeclare().getQueue();
 		                                                         
