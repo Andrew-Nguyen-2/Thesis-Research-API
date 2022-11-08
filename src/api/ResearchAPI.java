@@ -102,38 +102,21 @@ public class ResearchAPI {
 	}
 	
 	/**
-	 * Get the received file path.
+	 * Get the received file path and format.
 	 * Place method call in a while true loop to continuously check if file has been received.
 	 * 
-	 * @return		The path where the file received is located.
+	 * @return		An array: [filePath, fileFormat] or [null, null].
 	 */
-	public String getReceivedFilepath() {
-		String cwd = System.getProperty("user.dir");
-		File dir = new File(cwd, "received-files");
-		// check receivedFilename is set, received files directory exists, and filename exists within the directory
-		if (this.receivedFilename != null && dir.exists() && Arrays.asList(dir.list()).contains(this.receivedFilename)) {
-			File file = new File(dir, this.receivedFilename);
-			return file.toString();
-		}
-		return null;
-	}
-	
-	/**
-	 * Get the received file path.
-	 * Place method call in a while true loop to continuously check if file has been received.
-	 * 
-	 * @return		The path where the file received is located.
-	 */
-	public String getReceivedFileFormat() {
+	public String[] getReceivedFilepath() {
 		String cwd = System.getProperty("user.dir");
 		File dir = new File(cwd, "received-files");
 		// check receivedFilename is set, received files directory exists, and filename exists within the directory
 		if (this.receivedFilename != null && dir.exists() && Arrays.asList(dir.list()).contains(this.receivedFilename)) {
 			File file = new File(dir, this.receivedFilename);
 			this.receivedFilename = null;
-			return file.getName().split("[.]")[1];
+			return new String[] {file.toString(), file.getName().split("[.]")[1]};
 		}
-		return null;
+		return new String[2];
 	}
 	
 	private class MessageThread extends Thread {

@@ -11,7 +11,7 @@ public class TestUser {
 //		user.addFile("/Users/andrewnguyen/eclipse-workspace/research/test-files/test-data.csv");
 		user.startListening();
 		while (true) {
-			String receivedFilepath = user.getReceivedFilepath();
+			String[] receivedFilepath = user.getReceivedFilepath();
 			if (receivedFilepath != null) {
 				System.out.println("\nreceivedFilepath: " + receivedFilepath + "\n");
 				// translate file data
