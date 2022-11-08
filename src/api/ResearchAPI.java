@@ -107,7 +107,7 @@ public class ResearchAPI {
 	 * 
 	 * @return		An array: [filePath, fileFormat] or [null, null].
 	 */
-	public String[] getReceivedFilepath() {
+	public String[] getReceivedFile() {
 		String cwd = System.getProperty("user.dir");
 		File dir = new File(cwd, "received-files");
 		// check receivedFilename is set, received files directory exists, and filename exists within the directory
