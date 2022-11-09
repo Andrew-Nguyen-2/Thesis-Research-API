@@ -93,7 +93,7 @@ public class ProcessMessage {
 			
 			if (Objects.equals(this.messageType, Constants.SENT_DATA)) {
 				String filename = this.message.getFileData().get(0).getFileName();
-				return Wormhole.receive(this.message.getContent(), filename);
+				return Wormhole.receive(this.message.getContent(), filename, this.senderID);
 			}
 		}
 		return null;
@@ -186,8 +186,11 @@ public class ProcessMessage {
 			String filename = filedata.getFileName();
 			String fileformat = filename.split("[.]")[1];
 			
-			// if the format the sender sent is one the user wants
-			if (requestWantFormats.contains(fileformat)) {
+			// check if the user has already requested the file from the user
+			Boolean alreadyRequested = this.user.getFilesRequested(originSenderID) != null && this.user.getFilesRequested(originSenderID).contains(filename);
+			
+			// if the format the sender sent is one the user wants and the user has not requested the file
+			if (requestWantFormats.contains(fileformat) && Boolean.TRUE.equals(!alreadyRequested)) {
 				Message requestMessage = new Message(this.userID, Constants.REQUEST_DATA);
 				requestMessage.addRequestFormats(requestWantFormats);
 				requestMessage.requestFile(filedata);
@@ -195,6 +198,7 @@ public class ProcessMessage {
 				requestMessage.addSourceUserID(originSenderID);
 				requestMessage.addContent("Requesting file '" + filename + "'");
 				this.connection.direct(requestMessage, originSenderID);
+				this.user.addFileRequest(originSenderID, filename);
 				break;
 			}
 		}

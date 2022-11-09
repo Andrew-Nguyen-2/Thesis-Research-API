@@ -24,6 +24,7 @@ public class User {
 	private ArrayList<Path> 				filepaths;
 	
 	private Map<String, Message> 			receivedMessages;
+	private Map<String, ArrayList<String>>	filesRequested;
 	
 	/**
 	 * Constructor for creating a User instance.
@@ -34,6 +35,7 @@ public class User {
 		this.convert = new HashMap<>();
 		this.filepaths = new ArrayList<>();
 		this.receivedMessages = new HashMap<>();
+		this.filesRequested = new HashMap<>();
 	}
 	
 	// ************************************
@@ -80,6 +82,30 @@ public class User {
 	 */
 	public void addReceivedMessage(String messageID, Message message) {
 		this.receivedMessages.put(messageID, message);
+	}
+	
+	/**
+	 * Add a file request to sourceUserID mapping in requests.
+	 * 
+	 * @param sourceUserID		The user who has the data.
+	 * @param filename			The name of the file requested.
+	 */
+	public void addFileRequest(String sourceUserID, String filename) {
+		this.filesRequested.putIfAbsent(sourceUserID, new ArrayList<>());
+		this.filesRequested.get(sourceUserID).add(filename);
+	}
+	
+	/**
+	 * Remove the file request for the sender and delete sender from hash map if no more requests.
+	 * 
+	 * @param sourceUserID		The user who has the data.
+	 * @param filename			The name of the file to be removed from requests.
+	 */
+	public void removeFileRequest(String sourceUserID, String filename) {
+		this.filesRequested.get(sourceUserID).remove(filename);
+		if (this.filesRequested.get(sourceUserID).isEmpty()) {
+			this.filesRequested.remove(sourceUserID);
+		}
 	}
 	
 	// ************************************
@@ -152,5 +178,16 @@ public class User {
 	 */
 	public String getUserID() {
 		return userID;
+	}
+	
+	/**
+	 * Get the list of files requested from a user.
+	 * 
+	 * @param sourceUserID		The user who has data.
+	 * 
+	 * @return					An ArrayList of filenames requested for the user.
+	 */
+	public List<String> getFilesRequested(String sourceUserID) {
+		return this.filesRequested.get(sourceUserID);
 	}
 }

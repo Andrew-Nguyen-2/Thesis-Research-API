@@ -159,7 +159,8 @@ public class ResearchAPI {
 				while(receiveObj.getRunningThread().isAlive()) {
 					// wait until thread is finished before setting the filename
 				}
-				receivedFilename = receiveObj.getFilename();
+				receivedFilename = receiveObj.getNewFilename();
+				user.removeFileRequest(receiveObj.getSourceUserID(), receiveObj.getOriginalFilename());
 			}
 		}
 	}

@@ -57,9 +57,10 @@ public class Wormhole {
 	 * @param filename		The name of the file being received.
 	 * @return 				A ReceivedObj object containing the name of the file received and the running <i>wormhole receive</i> thread.
 	 */
-	public static ReceiveObj receive(String command, String filename) {
+	public static ReceiveObj receive(String command, String filename, String senderID) {
 		StringBuilder commandBuilder = new StringBuilder(command);
 		File receivedDir = new File(cwd, "received-files");
+		String originalFilename = filename;
 		
 		// check if received-files directory exists, create if it does not
 		if (!receivedDir.exists()) {
@@ -77,7 +78,7 @@ public class Wormhole {
 		commandBuilder.append(" -o " + filename);
 		
 		Thread running = Executive.execute(commandBuilder.toString(), receivedDir);
-		return new ReceiveObj(filename, running);
+		return new ReceiveObj(filename, running, senderID, originalFilename);
 	}
 	
 	/**
@@ -95,20 +96,33 @@ public class Wormhole {
 	
 	public static class ReceiveObj {
 		
-		private String filename;
+		private String newFilename;
 		private Thread running;
 		
-		public ReceiveObj(String filename, Thread running) {
-			this.filename = filename;
+		private String sourceUserID;
+		private String originalFilename;
+		
+		public ReceiveObj(String newFilename, Thread running, String sourceUserID, String originalFilename) {
+			this.newFilename = newFilename;
 			this.running = running;
+			this.sourceUserID = sourceUserID;
+			this.originalFilename = originalFilename;
 		}
 		
-		public String getFilename() {
-			return this.filename;
+		public String getNewFilename() {
+			return this.newFilename;
 		}
 		
 		public Thread getRunningThread() {
 			return this.running;
+		}
+		
+		public String getSourceUserID() {
+			return this.sourceUserID;
+		}
+		
+		public String getOriginalFilename() {
+			return this.originalFilename;
 		}
 	}
 }
