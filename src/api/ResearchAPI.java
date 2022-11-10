@@ -26,8 +26,12 @@ public class ResearchAPI {
 	
 	private User 				user;
 	private RabbitMQConnection 	connection;
-	private String				username;
+	
 	private String				receivedFilename;
+	
+	// jlabdaq credentials
+	private String				username;
+	private String				password;
 	
 	/**
 	 * Constructor for creating a ResearchAPI instance.
@@ -58,7 +62,7 @@ public class ResearchAPI {
 		}
 		this.user.addFilepaths(filepath);
 		if (this.connection == null) {
-			connect(this.username);
+			connect(this.username, this.password);
 		}
 		Message announceData = new Message(this.user.getUserID(), Constants.ANNOUNCE_MESSAGE);
 		for (Path path : this.user.getFilepaths()) {
@@ -82,11 +86,13 @@ public class ResearchAPI {
 	 * Connect to the RabbitMQ server.
 	 * 
 	 * @param username		The username of account on jlabdaq.
+	 * @param password		The password for the account on jlabdaq.
 	 */
-	public void connect(String username) {
+	public void connect(String username, String password) {
 		try {
 			this.username = username;
-			this.connection = new RabbitMQConnection(this.user, this.username);
+			this.password = password;
+			this.connection = new RabbitMQConnection(this.user, this.username, this.password);
 		} catch (IOException | TimeoutException e) {
 			e.printStackTrace();
 		}
