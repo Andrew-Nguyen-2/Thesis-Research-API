@@ -1,5 +1,6 @@
 package constants;
 
+
 import java.util.logging.Logger;
 
 public final class Constants {
