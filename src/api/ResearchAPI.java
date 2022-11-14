@@ -112,9 +112,19 @@ public class ResearchAPI {
 	}
 	
 	/**
+	 * <pre>
 	 * Get the received file path and format.
 	 * Place method call in a while true loop to continuously check if file has been received.
 	 * 
+	 * {@code}
+	 * ResearchAPI example = new ResearchAPI();
+	 * 
+	 * while (true) {
+	 * 	String[] fileInfo = example.getReceivedFile();
+	 * 	String receivedFilePath = fileInfo[0];
+	 * 	String receivedFileFormat = fileInfo[1];
+	 * }
+	 * </pre>
 	 * @return		An array: [filePath, fileFormat] or [null, null].
 	 */
 	public String[] getReceivedFile() {
