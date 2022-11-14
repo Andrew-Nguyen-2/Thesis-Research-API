@@ -114,6 +114,7 @@ public class ResearchAPI {
 	}
 
 	/**
+	 * <pre>
 	 * Get the received file path and format.
 	 * Place method call in a while true loop to continuously check if file has been
 	 * received.
