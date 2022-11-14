@@ -22,7 +22,12 @@ import rabbitmq.RabbitMQConnection;
 import user.User;
 
 /**
- * The entry point into the api.
+ * This class connects to the RabbitMQ Server and allows the user to specify the
+ * formats wanted, formats that can be read and translated, and the files
+ * available.
+ * 
+ * @author Andrew Nguyen
+ * 
  */
 public class ResearchAPI {
 
@@ -56,7 +61,7 @@ public class ResearchAPI {
 	}
 
 	/**
-	 * Add the file path of data to share and make an announcement.
+	 * Add the file path for the data to share and make an announcement.
 	 * 
 	 * @param filepath The full file path of the data.
 	 */
