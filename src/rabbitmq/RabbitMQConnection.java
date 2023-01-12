@@ -62,20 +62,7 @@ public class RabbitMQConnection {
 	public RabbitMQConnection(User user, String username, String password) throws IOException, TimeoutException {
 		this.user = user;
 		ConnectionFactory factory = new ConnectionFactory();
-//		factory.setHost("137.155.2.201");
-		
-		// ssh tunneling to server hosted on jlabdaq
-		try {
-			JSch jsch = new JSch();
-			checkKnownHosts();
-			jsch.setKnownHosts(KNOWN_HOSTS_DIRECTORY.toString());
-			this.session = jsch.getSession(username, HOST_SERVER, SSH_PORT);
-			this.session.setPassword(password);
-			this.session.connect();
-			this.session.setPortForwardingL(MESSAGE_PORT, LOCAL_HOST, MESSAGE_PORT);
-		} catch (JSchException e) {
-			e.printStackTrace();
-		}
+		factory.setHost("137.155.2.201");
 		
 		connection = factory.newConnection();
 		channel = connection.createChannel();
