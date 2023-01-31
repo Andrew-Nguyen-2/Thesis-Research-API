@@ -29,7 +29,7 @@ import user.User;
 public class RabbitMQConnection {
 	
 	private static final String EXCHANGE_NAME 			= "milestone1";
-	private static final String EXCHANGE_TYPE 			= "topic";
+	private static final String EXCHANGE_TYPE 			= "direct";
 	private static final String ANNOUNCE_ROUTING_KEY	= "announce";
 	private static final String	SENT 					= " [x] Sent ";
 	
