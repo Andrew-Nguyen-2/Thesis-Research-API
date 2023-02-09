@@ -25,6 +25,7 @@ public class User {
 	
 	private Map<String, Message> 			receivedMessages;
 	private Map<String, ArrayList<String>>	filesRequested;
+	private Message 						requestMessage;
 	
 	/**
 	 * Constructor for creating a User instance.
@@ -108,6 +109,14 @@ public class User {
 		}
 	}
 	
+	public void addRequestMessage(Message message) {
+		this.requestMessage = message;
+	}
+	
+	public void removeRequestMessage() {
+		this.requestMessage = null;
+	}
+	
 	// ************************************
 	//
 	//				Getters
@@ -189,5 +198,9 @@ public class User {
 	 */
 	public List<String> getFilesRequested(String sourceUserID) {
 		return this.filesRequested.get(sourceUserID);
+	}
+	
+	public Message getRequestMessage() {
+		return this.requestMessage;
 	}
 }

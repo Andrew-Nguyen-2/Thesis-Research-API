@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import rabbitmq.RabbitMQConnection;
+import user.User;
 
 /**
  * Send and receive files using magic-wormhole.
@@ -57,7 +58,7 @@ public class Wormhole {
 	 * @param filename		The name of the file being received.
 	 * @return 				A ReceivedObj object containing the name of the file received and the running <i>wormhole receive</i> thread.
 	 */
-	public static ReceiveObj receive(String command, String filename, String senderID) {
+	public static ReceiveObj receive(RabbitMQConnection connection, Message requestMessage, String command, String filename, String senderID) {
 		StringBuilder commandBuilder = new StringBuilder(command);
 		File receivedDir = new File(cwd, "received-files");
 		String originalFilename = filename;
@@ -77,7 +78,7 @@ public class Wormhole {
 		// receive the file as the filename
 		commandBuilder.append(" -o " + filename);
 		
-		Thread running = Executive.execute(commandBuilder.toString(), receivedDir);
+		Thread running = Executive.execute(commandBuilder.toString(), receivedDir, connection, requestMessage);
 		return new ReceiveObj(filename, running, senderID, originalFilename);
 	}
 	

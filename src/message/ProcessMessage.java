@@ -93,7 +93,7 @@ public class ProcessMessage {
 			
 			if (Objects.equals(this.messageType, Constants.SENT_DATA)) {
 				String filename = this.message.getFileData().get(0).getFileName();
-				return Wormhole.receive(this.message.getContent(), filename, this.senderID);
+				return Wormhole.receive(this.connection, this.user.getRequestMessage(), this.message.getContent(), filename, this.senderID);
 			}
 		}
 		return null;
@@ -199,6 +199,7 @@ public class ProcessMessage {
 				requestMessage.addContent("Requesting file '" + filename + "'");
 				this.connection.direct(requestMessage, originSenderID);
 				this.user.addFileRequest(originSenderID, filename);
+				this.user.addRequestMessage(requestMessage);
 				break;
 			}
 		}

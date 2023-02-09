@@ -177,6 +177,7 @@ public class ResearchAPI {
 				}
 				receivedFilename = receiveObj.getNewFilename();
 				user.removeFileRequest(receiveObj.getSourceUserID(), receiveObj.getOriginalFilename());
+				user.removeRequestMessage();
 			}
 		}
 	}

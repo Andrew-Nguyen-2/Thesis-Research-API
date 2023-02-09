@@ -39,6 +39,10 @@ public class Executive {
 	private String 				originMessageID;
 	private String 				requestUserID;
 	
+	
+	// message sent to request the data
+	private Message 			requestMessage;
+	
 	public Executive() {
 		done = false;
 	}
@@ -84,6 +88,10 @@ public class Executive {
 		this.requestUserID = message.getSenderID();
 	}
 	
+	public void setRequestMessage(Message message) {
+		this.requestMessage = message;
+	}
+	
 	/**
 	 * Check whether we are running on a Mac
 	 * Only used for the "talking" test
@@ -115,6 +123,12 @@ public class Executive {
 		sendData.addSourceUserID(userID);
 		sendData.addContent(command);
 		connection.direct(sendData, requestUserID);
+	}
+	
+	
+	private void requestDataAgain() {
+		String originSenderID = this.requestMessage.getSourceUserID();
+		connection.direct(requestMessage, originSenderID);
 	}
 	
 
@@ -202,6 +216,15 @@ public class Executive {
 								if (line.contains("wormhole receive")) {
 									sendMessage(line);
 								}
+								if (line.contains("ERROR") && command.contains("send")) {
+									// check if user is attempting to send the message and it is magic-wormhole failed
+									System.out.println("MAGIC WORMHOLE SEND ERROR MESSAGE APPEARED");
+								}
+								if (line.contains("ERROR") && command.contains("receive")) {
+									// check if user is attempting to receive the message and it is magic-wormhole failed
+									System.out.println("MAGIC WORMHOLE RECEIVE ERROR MESSAGE APPEARED");
+									requestDataAgain();
+								}
 							} else {
 								try {
 									Thread.sleep(50);
@@ -263,7 +286,7 @@ public class Executive {
 	}
 	
 	/**
-	 * Execute a command in its own process
+	 * Execute a command in its own process, used in checkKnownHosts method in RabbitMQConnection file
 	 * 
 	 * @param command	the command
 	 * @param dir 		first cd to this directory (if not null)
@@ -282,7 +305,29 @@ public class Executive {
 	}
 	
 	/**
-	 * Execute a command in its own process
+	 * Execute a command in its own process, used in receive method in Wormhole file
+	 * 
+	 * @param command	the command
+	 * @param dir 		first cd to this directory (if not null)
+	 * @return 			the running thread
+	 */
+	public static Thread execute(final String command, File dir, RabbitMQConnection connection, Message requestMessage) {
+		
+		Executive executive = new Executive();
+
+		if ((dir != null) && dir.exists() && dir.isDirectory()) {
+			executive.setCWD(dir.getPath());
+		}
+		
+		executive.setRequestMessage(requestMessage);
+		executive.setConnection(connection);
+		executive.execute(command);
+		return executive.getRunningThread();
+	}
+	
+	
+	/**
+	 * Execute a command in its own process, used in send method in Wormhole file
 	 * 
 	 * @param command 		the command
 	 * @param dir 			first cd to this directory (if not null)
