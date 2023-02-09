@@ -453,7 +453,8 @@ public class Message {
 		private void setData(JSONArray filedata) {
 			for (Object file : filedata) {
 				String filename = ((JSONObject) file).getString(Constants.FILENAME);
-				String filesize = Integer.toString(((JSONObject) file).getInt(Constants.FILESIZE));
+//				String filesize = Integer.toString(((JSONObject) file).getInt(Constants.FILESIZE));
+				String filesize = ((JSONObject) file).get(Constants.FILESIZE).toString();
 				this.data.add(new FileData(filename, filesize));
 			}
 			

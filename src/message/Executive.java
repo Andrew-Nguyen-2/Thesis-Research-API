@@ -216,15 +216,11 @@ public class Executive {
 								if (line.contains("wormhole receive")) {
 									sendMessage(line);
 								}
-								if (line.contains("ERROR") && command.contains("send")) {
-									// check if user is attempting to send the message and it is magic-wormhole failed
-									System.out.println("MAGIC WORMHOLE SEND ERROR MESSAGE APPEARED");
-								}
 								if (line.contains("ERROR") && command.contains("receive")) {
 									// check if user is attempting to receive the message and it is magic-wormhole failed
-									System.out.println("MAGIC WORMHOLE RECEIVE ERROR MESSAGE APPEARED");
 									requestDataAgain();
 								}
+								
 							} else {
 								try {
 									Thread.sleep(50);

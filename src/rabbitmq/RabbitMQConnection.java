@@ -62,7 +62,7 @@ public class RabbitMQConnection {
 	public RabbitMQConnection(User user, String username, String password) throws IOException, TimeoutException {
 		this.user = user;
 		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost("137.155.2.201");
+		factory.setHost(LOCAL_HOST);
 		
 		connection = factory.newConnection();
 		channel = connection.createChannel();
