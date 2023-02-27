@@ -37,6 +37,10 @@ public class Log {
 		}
 	}
 	
+	public static void addLogMessage(String message) {
+		logger.log(Level.INFO, message);
+	}
+	
 	/**
 	 * Create the directory to hold the logs if one does not already exist.
 	 * @return	The log directory

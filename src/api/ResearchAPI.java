@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DeliverCallback;
@@ -107,7 +106,8 @@ public class ResearchAPI {
 	public void startListening() {
 		(new MessageThread()).start();
 //		Constants.LOGGER.log(Level.ALL, " [*] Began listening to RabbitMQ server.%n");
-		System.out.println(" [*] Began listening to RabbitMQ server. \n");
+//		System.out.println(" [*] Began listening to RabbitMQ server. \n");
+		Log.addLogMessage(" [*] Begin listening to RabbitMQ server.");
 	}
 	
 	/**
