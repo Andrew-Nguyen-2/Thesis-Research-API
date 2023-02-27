@@ -1,10 +1,11 @@
 import api.ResearchAPI;
 
 public class TestUser {
-	
+
 	public static void main(String[] args) {
-		ResearchAPI api = new ResearchAPI();
-		api.connect("anguyen", "$Elliot42");
+		ResearchAPI api = new ResearchAPI("console");
+		api.connect("", "");
+		api.addConvertFormat("csv", "png");
 		api.addWantFormats("csv");
 		api.startListening();
 		while (true) {

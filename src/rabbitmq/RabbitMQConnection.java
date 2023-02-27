@@ -112,7 +112,7 @@ public class RabbitMQConnection {
 		try {
 			channel.basicPublish(EXCHANGE_NAME, ANNOUNCE_ROUTING_KEY, null, message.toJSON().getBytes());
 			String sent = SENT + message;
-			Constants.LOGGER.log(Level.ALL, sent);
+//			Constants.LOGGER.log(Level.ALL, sent);
 			System.out.print(sent);
 			System.out.println("To: Everyone\n");
 		} catch (IOException e) {
@@ -130,7 +130,7 @@ public class RabbitMQConnection {
 		try {
 			channel.basicPublish(EXCHANGE_NAME, userID, null, message.toJSON().getBytes());
 			String sent = SENT + message;
-			Constants.LOGGER.log(Level.ALL, sent);
+//			Constants.LOGGER.log(Level.ALL, sent);
 			System.out.print(sent);
 			System.out.println("To: " + userID + "\n");
 		} catch (IOException e) {

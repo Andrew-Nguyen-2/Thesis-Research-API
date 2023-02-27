@@ -39,14 +39,5 @@ public final class Constants {
 	
 	public static final String CONTENT					= "content";
 	
-	
-	// ************************
-	//
-	//			Logger
-	//
-	// ************************
-	
-	public static final Logger LOGGER					= Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-	
 	private Constants() {}
 }

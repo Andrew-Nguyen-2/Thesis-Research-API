@@ -12,6 +12,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DeliverCallback;
 
 import constants.Constants;
+import logging.Log;
 import message.Message;
 import message.ProcessMessage;
 import message.Wormhole.ReceiveObj;
@@ -35,8 +36,10 @@ public class ResearchAPI {
 	
 	/**
 	 * Constructor for creating a ResearchAPI instance.
+	 * @param logType  The type of logging output (file or console)
 	 */
-	public ResearchAPI() {
+	public ResearchAPI(String logType) {
+		Log.setOutput(logType);
 		this.user = new User();
 	}
 	
@@ -103,7 +106,7 @@ public class ResearchAPI {
 	 */
 	public void startListening() {
 		(new MessageThread()).start();
-		Constants.LOGGER.log(Level.ALL, " [*] Began listening to RabbitMQ server.%n");
+//		Constants.LOGGER.log(Level.ALL, " [*] Began listening to RabbitMQ server.%n");
 		System.out.println(" [*] Began listening to RabbitMQ server. \n");
 	}
 	
