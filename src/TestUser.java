@@ -4,8 +4,7 @@ public class TestUser {
 
 	public static void main(String[] args) {
 		ResearchAPI api = new ResearchAPI("console", "FINEST");
-		api.connect("", "");
-		api.addFile("blah");
+		api.connect("andrew-nguyen", "");
 		api.addConvertFormat("csv", "png");
 		api.addWantFormats("csv");
 		api.startListening();
