@@ -10,6 +10,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
+import constants.Constants;
 import logging.Log;
 import message.Message;
 import user.User;
@@ -37,24 +38,21 @@ public class RabbitMQConnection {
 	/**
 	 * Constructor for creating a RabbitMQConnection.
 	 * 
-	 * @param user     The user connecting to the RabbitMQ server.
-	 * @param username The username of account on jlabdaq.
-	 * @param password The password for the account on jlabdaq.
+	 * @param user The user connecting to the RabbitMQ server.
 	 * @throws IOException
 	 * @throws TimeoutException
 	 * @throws URISyntaxException
 	 * @throws NoSuchAlgorithmException
 	 * @throws KeyManagementException
 	 */
-	public RabbitMQConnection(User user, String username, String password)
+	public RabbitMQConnection(User user)
 			throws IOException, TimeoutException, KeyManagementException, NoSuchAlgorithmException, URISyntaxException {
 		this.user = user;
 		ConnectionFactory factory = new ConnectionFactory();
-		factory.setUsername("guest");
-		factory.setPassword("tyfdox-3hAmba-fosgyr");
-		factory.setHost("b-ea204bc2-fa85-44c6-aa3d-26418a344982.mq.us-east-2.amazonaws.com");
-		factory.setPort(5671);
-		factory.useSslProtocol();
+
+		factory.setUri(Constants.RABBITMQ_URI);
+		factory.setUsername(Constants.USERNAME);
+		factory.setPassword(Constants.PASSWORD);
 
 		connection = factory.newConnection();
 		channel = connection.createChannel();
