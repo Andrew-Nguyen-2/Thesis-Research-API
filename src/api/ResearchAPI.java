@@ -35,10 +35,13 @@ public class ResearchAPI {
 	
 	/**
 	 * Constructor for creating a ResearchAPI instance.
-	 * @param logType  The type of logging output (file or console)
+	 * @param logType	The type of logging output (file or console)
+	 * @param logLevel	The level of logging (ex. FINE, INFO, WARNING). <br>
+	 * 					Logs will be generated for levels following the one inputed. <br>
+	 * 					For example, if logLevel is set to INFO, logs will be generated for INFO and WARNING.
 	 */
-	public ResearchAPI(String logType) {
-		Log.setOutput(logType);
+	public ResearchAPI(String logType, String logLevel) {
+		Log.setOutput(logType, logLevel);
 		this.user = new User();
 	}
 	
@@ -96,7 +99,7 @@ public class ResearchAPI {
 			this.password = password;
 			this.connection = new RabbitMQConnection(this.user, this.username, this.password);
 		} catch (IOException | TimeoutException e) {
-			e.printStackTrace();
+			Log.error(e.getMessage(), ResearchAPI.class.getName() + ":" + "connect");
 		}
 	}
 	
@@ -159,7 +162,7 @@ public class ResearchAPI {
 				
 				channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {});
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.error(e.getMessage(), MessageThread.class.getName());
 			}
 		}
 		

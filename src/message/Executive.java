@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.nio.file.Path;
 
 import constants.Constants;
+import logging.Log;
 import rabbitmq.RabbitMQConnection;
 
 /**
@@ -28,6 +29,8 @@ public class Executive {
 	private static final String HOMEBREW_BIN  = "/opt/homebrew/bin";
 	private static final String HOMEBREW_SBIN = "/opt/homebrew/sbin";
 	private static final String HOMEBREW_PATH = ":/opt/homebrew/bin:/opt/homebrew/sbin";
+	
+	private static final String CLASS_NAME 	  = Executive.class.getName();
 
 	// current working dir
 	private String 				_cwd;
@@ -212,7 +215,7 @@ public class Executive {
 						while (!done) {
 							String line = stdOutReader.readLine();
 							if (line != null) {
-								System.out.println(line);
+								Log.debug(line, CLASS_NAME, command);
 								if (line.contains("wormhole receive")) {
 									sendMessage(line);
 								}
@@ -237,7 +240,7 @@ public class Executive {
 							if (line == null) {
 								reading = false;
 							} else {
-								System.out.println(line);
+								Log.debug(line, CLASS_NAME, command);
 							}
 						}
 						// really done
@@ -249,7 +252,7 @@ public class Executive {
 							if (line == null) {
 								reading = false;
 							} else {
-								System.err.println(line);
+								Log.error(line, CLASS_NAME, command);
 							}
 						}
 						stdErrReader.close();
@@ -265,10 +268,8 @@ public class Executive {
 			running.start();
 			(new Thread(reader)).start();
 
-		} catch (Error error) {
-			System.err.println(error.getMessage());
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
+		} catch (Error | Exception error) {
+			Log.error(error.getMessage(), CLASS_NAME, command);
 		}
 
 	}

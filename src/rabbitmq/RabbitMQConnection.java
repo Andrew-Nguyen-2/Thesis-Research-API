@@ -8,6 +8,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 
 import constants.Constants;
+import logging.Log;
 
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;
@@ -27,6 +28,8 @@ import user.User;
  *
  */
 public class RabbitMQConnection {
+	
+	private static final String CLASS_NAME				= RabbitMQConnection.class.getName();
 	
 	private static final String EXCHANGE_NAME 			= "milestone1";
 	private static final String EXCHANGE_TYPE 			= "direct";
@@ -112,11 +115,9 @@ public class RabbitMQConnection {
 		try {
 			channel.basicPublish(EXCHANGE_NAME, ANNOUNCE_ROUTING_KEY, null, message.toJSON().getBytes());
 			String sent = SENT + message;
-//			Constants.LOGGER.log(Level.ALL, sent);
-			System.out.print(sent);
-			System.out.println("To: Everyone\n");
+			Log.sent(sent);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.error(e.getMessage(), CLASS_NAME + ":" + ANNOUNCE_ROUTING_KEY);
 		}
 	}
 	
@@ -130,11 +131,9 @@ public class RabbitMQConnection {
 		try {
 			channel.basicPublish(EXCHANGE_NAME, userID, null, message.toJSON().getBytes());
 			String sent = SENT + message;
-//			Constants.LOGGER.log(Level.ALL, sent);
-			System.out.print(sent);
-			System.out.println("To: " + userID + "\n");
+			Log.sent(sent);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.error(e.getMessage(), CLASS_NAME + ":" + EXCHANGE_TYPE);
 		}
 	}
 	
