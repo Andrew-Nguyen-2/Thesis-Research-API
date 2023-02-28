@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -13,10 +12,13 @@ import java.util.logging.SimpleFormatter;
 
 public class Log {
 	
-	private static final Logger logger = Logger.getLogger(Log.class.getName());
+	private static final String LOG_CLASS = Log.class.getName();
+	
+	public static final Logger  logger 	  = Logger.getLogger(LOG_CLASS);
+	
 	
 	private Log() {
-		logger.setLevel(Level.INFO);
+		logger.setLevel(Level.WARNING);
 	}
 	
 	/**
@@ -32,13 +34,19 @@ public class Log {
 			} catch (SecurityException | IOException e) {
 				e.printStackTrace();
 			}
-		} else {
-			logger.addHandler(new ConsoleHandler());
 		}
 	}
 	
-	public static void addLogMessage(String message) {
-		logger.log(Level.INFO, message);
+	/**
+	 * Log messages not relating to message sending/ receiving
+	 * @param message	The message to be logged
+	 */
+	public static void other(String message) {
+		logger.logp(Level.INFO, Log.class.getName(), "", message);
+	}
+	
+	public static void error(String message, String methodName) {
+		logger.logp(Level.WARNING, LOG_CLASS, methodName, message);
 	}
 	
 	/**

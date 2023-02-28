@@ -59,7 +59,7 @@ public class ResearchAPI {
 	public void addFile(String filepath) {
 		File file = new File(filepath);
 		if (!file.exists()) {
-			System.out.println("ERROR: filepath does not exist for: '" + filepath + "'");
+			Log.error("filepath does not exist for: '" + filepath + "'", "addFile");
 			return;
 		}
 		this.user.addFilepaths(filepath);
@@ -105,9 +105,7 @@ public class ResearchAPI {
 	 */
 	public void startListening() {
 		(new MessageThread()).start();
-//		Constants.LOGGER.log(Level.ALL, " [*] Began listening to RabbitMQ server.%n");
-//		System.out.println(" [*] Began listening to RabbitMQ server. \n");
-		Log.addLogMessage(" [*] Begin listening to RabbitMQ server.");
+		Log.other(" [*] Begin listening to RabbitMQ server.");
 	}
 	
 	/**

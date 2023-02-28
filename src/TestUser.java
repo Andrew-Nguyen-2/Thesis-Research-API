@@ -5,6 +5,7 @@ public class TestUser {
 	public static void main(String[] args) {
 		ResearchAPI api = new ResearchAPI("console");
 		api.connect("", "");
+		api.addFile("blah");
 		api.addConvertFormat("csv", "png");
 		api.addWantFormats("csv");
 		api.startListening();
