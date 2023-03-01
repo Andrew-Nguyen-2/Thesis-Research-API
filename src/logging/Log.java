@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -46,7 +47,7 @@ public class Log {
 				break;
 		}
 		logger.setLevel(level);
-		setOutputHelper(outputType);
+		setOutputHelper(outputType, level);
 	}
 
 	/**
@@ -109,20 +110,26 @@ public class Log {
 	}
 
 	/**
-	 * Set the handler to use a file
+	 * Set the handler to use a file.
 	 * 
-	 * @param outputType The level of logging (ex. FINE, INFO, WARNING)
+	 * @param outputType The type of logging output (file or console)
+	 * @param logLevel   The level of logging (ex. FINE, INFO, WARNING).
 	 */
-	private static void setOutputHelper(String outputType) {
+	private static void setOutputHelper(String outputType, Level logLevel) {
+		Handler handler = null;
 		if (outputType.equals("file")) {
 			try {
-				Handler fileHandler = new FileHandler(getLogFileName());
-				fileHandler.setFormatter(new SimpleFormatter());
-				logger.addHandler(fileHandler);
+				handler = new FileHandler(getLogFileName());
+				handler.setFormatter(new SimpleFormatter());
 			} catch (SecurityException | IOException e) {
 				e.printStackTrace();
 			}
+		} else {
+			handler = new ConsoleHandler();
 		}
+		handler.setLevel(logLevel); // set level for handler
+		logger.addHandler(handler); // add handler to logger
+		logger.setUseParentHandlers(false); // keeps logger from printing twice
 	}
 
 	/**
