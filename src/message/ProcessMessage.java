@@ -312,7 +312,12 @@ public class ProcessMessage {
 			}
 		}
 
-		if (requestFormat != null) {
+		// check if the user has already requested translation for this file
+		String filename = this.message.getFileData().get(0).getFileName();
+		Boolean alreadyRequested = this.user.getTranslationFormatRequests(filename) != null
+				&& this.user.getTranslationFormatRequests(filename).contains(requestFormat);
+
+		if (requestFormat != null && Boolean.TRUE.equals(!alreadyRequested)) {
 			Message requestMessage = new Message(this.userID, Constants.REQUEST_DATA);
 			for (FileData file : this.message.getFileData()) {
 				requestMessage.requestFile(file);
@@ -322,6 +327,7 @@ public class ProcessMessage {
 			requestMessage.addSourceUserID(this.message.getSourceUserID());
 			requestMessage.addContent("Requesting data to be converted to " + requestFormat);
 			this.connection.direct(requestMessage, this.senderID);
+			this.user.addTranslationRequest(filename, requestFormat);
 		}
 	}
 

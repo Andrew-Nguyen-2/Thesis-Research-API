@@ -184,8 +184,10 @@ public class ResearchAPI {
 					// wait until thread is finished before setting the filename
 				}
 				receivedFilename = receiveObj.getNewFilename();
+				Log.received("Received file: " + receivedFilename);
 				user.removeFileRequest(receiveObj.getSourceUserID(), receiveObj.getOriginalFilename());
 				user.removeRequestMessage();
+				user.removeTranslationRequest(receiveObj.getOriginalFilename(), receiveObj.getFileFormat());
 			}
 		}
 	}
