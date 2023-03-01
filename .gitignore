@@ -191,3 +191,7 @@ gradle-app.setting
 *.hprof
 
 # End of https://www.toptal.com/developers/gitignore/api/eclipse,java,linux,osx,windows,gradle
+
+# Application generated folders
+received-files/
+output-logs/

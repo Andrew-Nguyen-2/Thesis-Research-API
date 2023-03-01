@@ -143,10 +143,4 @@ public class Log {
 
 		return new File(logDir, filename).toString();
 	}
-
-	// public static void main(String[] args) {
-	// String mainDirector = Log.getLogFileName();
-	// System.out.println("date: " + mainDirector);
-	// }
-
 }
