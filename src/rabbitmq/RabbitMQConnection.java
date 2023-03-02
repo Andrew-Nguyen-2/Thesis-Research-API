@@ -51,8 +51,6 @@ public class RabbitMQConnection {
 		ConnectionFactory factory = new ConnectionFactory();
 
 		factory.setUri(Constants.RABBITMQ_URI);
-		factory.setUsername(Constants.USERNAME);
-		factory.setPassword(Constants.PASSWORD);
 
 		connection = factory.newConnection();
 		channel = connection.createChannel();

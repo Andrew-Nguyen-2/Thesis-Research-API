@@ -43,9 +43,7 @@ public final class Constants {
 	// **********************************
 
 	// TODO: find more secure way of storing variables for distribution
-	public static final String RABBITMQ_URI = "amqps://b-ea204bc2-fa85-44c6-aa3d-26418a344982.mq.us-east-2.amazonaws.com:5671";
-	public static final String USERNAME = "guest";
-	public static final String PASSWORD = "tyfdox-3hAmba-fosgyr";
+	public static final String RABBITMQ_URI = "amqps://xowvnltv:hwYeKNw5yGW6mg_7NoUx-QS7lDzGNael@woodpecker.rmq.cloudamqp.com/xowvnltv";
 
 	private Constants() {
 	}
