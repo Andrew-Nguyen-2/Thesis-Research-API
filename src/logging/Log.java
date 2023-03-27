@@ -31,6 +31,8 @@ public class Log {
 	 *                   generated for INFO and WARNING.
 	 */
 	public static void setOutput(String outputType, String logLevel) {
+		logLevel = logLevel.toUpperCase();
+		outputType = outputType.toLowerCase();
 		Level level = null;
 		switch (logLevel) {
 			case "FINE":
