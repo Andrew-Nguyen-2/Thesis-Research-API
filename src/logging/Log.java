@@ -27,7 +27,7 @@ public class Log {
 	 * @param logLevel   The level of logging (ex. FINE, INFO, WARNING). <br>
 	 *                   Logs will be generated for levels following the one
 	 *                   inputed. <br>
-	 *                   For example, if logLevel is set to INFO, logs will be
+	 *                   For example, if logLevel is set to FINE, logs will be
 	 *                   generated for INFO and WARNING.
 	 */
 	public static void setOutput(String outputType, String logLevel) {
