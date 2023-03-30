@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.nio.file.Path;
 
 import constants.Constants;
+import logging.Log;
 import rabbitmq.RabbitMQConnection;
 
 /**
@@ -29,6 +30,8 @@ public class Executive {
 	private static final String HOMEBREW_BIN  = "/opt/homebrew/bin";
 	private static final String HOMEBREW_SBIN = "/opt/homebrew/sbin";
 	private static final String HOMEBREW_PATH = ":/opt/homebrew/bin:/opt/homebrew/sbin";
+	
+	private static final String CLASS_NAME 	  = Executive.class.getName();
 
 	// current working dir
 	private String 				_cwd;
@@ -39,6 +42,10 @@ public class Executive {
 	private String 				filepath;
 	private String 				originMessageID;
 	private String 				requestUserID;
+	
+	
+	// message sent to request the data
+	private Message 			requestMessage;
 	
 	public Executive() {
 		done = false;
@@ -85,6 +92,10 @@ public class Executive {
 		this.requestUserID = message.getSenderID();
 	}
 	
+	public void setRequestMessage(Message message) {
+		this.requestMessage = message;
+	}
+	
 	/**
 	 * Check whether we are running on a Mac
 	 * Only used for the "talking" test
@@ -116,6 +127,12 @@ public class Executive {
 		sendData.addSourceUserID(userID);
 		sendData.addContent(command);
 		connection.direct(sendData, requestUserID);
+	}
+	
+	
+	private void requestDataAgain() {
+		String originSenderID = this.requestMessage.getSourceUserID();
+		connection.direct(requestMessage, originSenderID);
 	}
 	
 
@@ -199,10 +216,15 @@ public class Executive {
 						while (!done) {
 							String line = stdOutReader.readLine();
 							if (line != null) {
-								System.out.println(line);
+								Log.debug(line, CLASS_NAME, command);
 								if (line.contains("wormhole receive")) {
 									sendMessage(line);
 								}
+								if (line.contains("ERROR") && command.contains("receive")) {
+									// check if user is attempting to receive the message and it is magic-wormhole failed
+									requestDataAgain();
+								}
+								
 							} else {
 								try {
 									Thread.sleep(50);
@@ -219,7 +241,7 @@ public class Executive {
 							if (line == null) {
 								reading = false;
 							} else {
-								System.out.println(line);
+								Log.debug(line, CLASS_NAME, command);
 							}
 						}
 						// really done
@@ -231,7 +253,7 @@ public class Executive {
 							if (line == null) {
 								reading = false;
 							} else {
-								System.err.println(line);
+								Log.error(line, CLASS_NAME, command);
 							}
 						}
 						stdErrReader.close();
@@ -247,10 +269,8 @@ public class Executive {
 			running.start();
 			(new Thread(reader)).start();
 
-		} catch (Error error) {
-			System.err.println(error.getMessage());
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
+		} catch (Error | Exception error) {
+			Log.error(error.getMessage(), CLASS_NAME, command);
 		}
 
 	}
@@ -264,7 +284,7 @@ public class Executive {
 	}
 	
 	/**
-	 * Execute a command in its own process
+	 * Execute a command in its own process, used in checkKnownHosts method in RabbitMQConnection file
 	 * 
 	 * @param command	the command
 	 * @param dir 		first cd to this directory (if not null)
@@ -283,7 +303,29 @@ public class Executive {
 	}
 	
 	/**
-	 * Execute a command in its own process
+	 * Execute a command in its own process, used in receive method in Wormhole file
+	 * 
+	 * @param command	the command
+	 * @param dir 		first cd to this directory (if not null)
+	 * @return 			the running thread
+	 */
+	public static Thread execute(final String command, File dir, RabbitMQConnection connection, Message requestMessage) {
+		
+		Executive executive = new Executive();
+
+		if ((dir != null) && dir.exists() && dir.isDirectory()) {
+			executive.setCWD(dir.getPath());
+		}
+		
+		executive.setRequestMessage(requestMessage);
+		executive.setConnection(connection);
+		executive.execute(command);
+		return executive.getRunningThread();
+	}
+	
+	
+	/**
+	 * Execute a command in its own process, used in send method in Wormhole file
 	 * 
 	 * @param command 		the command
 	 * @param dir 			first cd to this directory (if not null)
