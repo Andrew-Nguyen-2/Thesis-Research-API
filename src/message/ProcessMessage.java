@@ -1,6 +1,5 @@
 package message;
 
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -96,7 +95,8 @@ public class ProcessMessage {
 
 			if (Objects.equals(this.messageType, Constants.SENT_DATA)) {
 				String filename = this.message.getFileData().get(0).getFileName();
-				return Wormhole.receive(this.connection, this.user.getRequestMessage(), this.message.getContent(), filename, this.senderID);
+				return Wormhole.receive(this.connection, this.user.getRequestMessage(), this.message.getContent(),
+						filename, this.senderID);
 			}
 		}
 		return null;
@@ -314,21 +314,24 @@ public class ProcessMessage {
 		}
 
 		// check if the user has already requested translation for this file
-		String filename = this.message.getFileData().get(0).getFileName();
-		Boolean alreadyRequested = this.user.getTranslationFormatRequests(filename) != null
-				&& this.user.getTranslationFormatRequests(filename).contains(requestFormat);
+		List<FileData> fileData = this.message.getFileData();
+		if (!fileData.isEmpty()) {
+			String filename = fileData.get(0).getFileName();
+			Boolean alreadyRequested = this.user.getTranslationFormatRequests(filename) != null
+					&& this.user.getTranslationFormatRequests(filename).contains(requestFormat);
 
-		if (requestFormat != null && Boolean.TRUE.equals(!alreadyRequested)) {
-			Message requestMessage = new Message(this.userID, Constants.REQUEST_DATA);
-			for (FileData file : this.message.getFileData()) {
-				requestMessage.requestFile(file);
+			if (requestFormat != null && Boolean.TRUE.equals(!alreadyRequested)) {
+				Message requestMessage = new Message(this.userID, Constants.REQUEST_DATA);
+				for (FileData file : this.message.getFileData()) {
+					requestMessage.requestFile(file);
+				}
+				requestMessage.addRequestFormats(requestFormat);
+				requestMessage.addOriginMessageID(this.message.getOriginMessageID());
+				requestMessage.addSourceUserID(this.message.getSourceUserID());
+				requestMessage.addContent("Requesting data to be converted to " + requestFormat);
+				this.connection.direct(requestMessage, this.senderID);
+				this.user.addTranslationRequest(filename, requestFormat);
 			}
-			requestMessage.addRequestFormats(requestFormat);
-			requestMessage.addOriginMessageID(this.message.getOriginMessageID());
-			requestMessage.addSourceUserID(this.message.getSourceUserID());
-			requestMessage.addContent("Requesting data to be converted to " + requestFormat);
-			this.connection.direct(requestMessage, this.senderID);
-			this.user.addTranslationRequest(filename, requestFormat);
 		}
 	}
 

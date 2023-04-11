@@ -213,7 +213,7 @@ public class Metadata {
     public void setData(JSONArray filedata) {
         for (Object file : filedata) {
             String filename = ((JSONObject) file).getString(Constants.FILENAME);
-            String filesize = Integer.toString(((JSONObject) file).getInt(Constants.FILESIZE));
+            String filesize = ((JSONObject) file).getString(Constants.FILESIZE);
             this.data.add(new FileData(filename, filesize));
         }
 
