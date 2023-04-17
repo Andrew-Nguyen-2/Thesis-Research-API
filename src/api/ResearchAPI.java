@@ -2,13 +2,9 @@ package api;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.concurrent.TimeoutException;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DeliverCallback;
@@ -102,11 +98,20 @@ public class ResearchAPI {
 	 * Connect to the RabbitMQ server.
 	 */
 	public void connect() {
-		try {
-			this.connection = new RabbitMQConnection(this.user);
-		} catch (IOException | TimeoutException | KeyManagementException | NoSuchAlgorithmException
-				| URISyntaxException e) {
-			Log.error("Failed to connect to RabbitMQ server", ResearchAPI.class.getName() + ":" + "connect");
+		this.connection = new RabbitMQConnection(this.user, "");
+		if (this.connection == null) {
+			return;
+		}
+	}
+
+	/**
+	 * Connect to a different RabbitMQ server than the default.
+	 * 
+	 * @param uri The RabbitMQ server uri.
+	 */
+	public void connect(String uri) {
+		this.connection = new RabbitMQConnection(this.user, uri);
+		if (this.connection == null) {
 			return;
 		}
 	}
@@ -115,8 +120,8 @@ public class ResearchAPI {
 	 * Start listening for messages.
 	 */
 	public void startListening() {
-		if (this.connection == null) {
-			Log.error("Failed to connect to RabbitMQ server", ResearchAPI.class.getName() + ":" + "startListening");
+		if (this.connection == null || this.connection.getChannel() == null) {
+			return;
 		} else {
 			(new MessageThread()).start();
 			Log.other(" [*] Begin listening to RabbitMQ server.");
