@@ -74,7 +74,12 @@ public class ResearchAPI {
 		this.user.addFilepaths(filepath);
 		if (this.connection == null) {
 			connect();
+			// return if the connection is still not set
+			if (this.connection == null) {
+				return;
+			}
 		}
+
 		Message announceData = new Message(this.user.getUserID(), Constants.ANNOUNCE_MESSAGE);
 		for (Path path : this.user.getFilepaths()) {
 			announceData.addFilePath(path.toString());
@@ -101,7 +106,8 @@ public class ResearchAPI {
 			this.connection = new RabbitMQConnection(this.user);
 		} catch (IOException | TimeoutException | KeyManagementException | NoSuchAlgorithmException
 				| URISyntaxException e) {
-			Log.error(e.getMessage(), ResearchAPI.class.getName() + ":" + "connect");
+			Log.error("Failed to connect to RabbitMQ server", ResearchAPI.class.getName() + ":" + "connect");
+			return;
 		}
 	}
 
@@ -109,8 +115,12 @@ public class ResearchAPI {
 	 * Start listening for messages.
 	 */
 	public void startListening() {
-		(new MessageThread()).start();
-		Log.other(" [*] Begin listening to RabbitMQ server.");
+		if (this.connection == null) {
+			Log.error("Failed to connect to RabbitMQ server", ResearchAPI.class.getName() + ":" + "startListening");
+		} else {
+			(new MessageThread()).start();
+			Log.other(" [*] Begin listening to RabbitMQ server.");
+		}
 	}
 
 	/**
